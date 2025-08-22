@@ -1,6 +1,7 @@
 # Kai's Enhancements — Autodetailing Website
 
-Production: https://kais-autodetailing.com
+Production: 
+![minimal-reproduce-example](https://i.imgur.com/3PYNGUz.png)
 
 This is the marketing website for Kai's Enhancements (autodetailing). Built with Next.js App Router, TypeScript, and Tailwind, with centralized business info and SEO metadata.
 
