@@ -1,43 +1,46 @@
-# What inside? <br/> <sub> no production url - pusher 'Connection closed' error</sub>
+# Kai's Enhancements — Autodetailing Website
 
-![minimal-reproduce-example](https://i.imgur.com/AxIPz7y.jpg)
+Production: 
+![minimal-reproduce-example](https://i.imgur.com/3PYNGUz.png)
 
-<br/>
-<br/>
-<br/>
+This is the marketing website for Kai's Enhancements (autodetailing). Built with Next.js App Router, TypeScript, and Tailwind, with centralized business info and SEO metadata.
 
+## Tech stack
+- Next.js 14 (App Router)
+- React 18, TypeScript
+- Tailwind CSS (+ tailwind-merge)
+- ESLint 9, Prettier 3
 
-https://github.com/nicitaacom/acc2-pusher_active_status/assets/39565703/61ccb3f0-5511-496f-98c6-4bc071dbf379
-
-
-# Clone repository
-
-## Step 1.1 - clone repository (variant 1)
-
-![alt text](https://i.imgur.com/9KSgjaN.png)
-
-## or Step 1.1 - clone repository (variant 2)
-
-```
-git clone https://github.com/nicitaacom/acc2-pusher_active_status
-```
-
-## Step 1.2 - install deps
-
-```
+## Quick start
+```bash
+# 1) Install dependencies
 pnpm i
-```
 
-## Step 1.3 - run project
-
-```
+# 2) Start dev server
 pnpm dev
+
+# 3) Build for production
+pnpm build
+
+# 4) Start production server
+pnpm start
 ```
 
-<br/>
-<br/>
-<br/>
+## Scripts
+- `pnpm dev`: run local development server
+- `pnpm build`: build production bundle
+- `pnpm start`: start the production server
+- `pnpm lint`: run ESLint
 
-## Step 2 - setup .env
+## Environment variables
+Create a `.env.local` with:
+```
+NEXT_PUBLIC_PRODUCTION_URL=https://kais-autodetailing.com
+```
+This value is used by `app/robots.ts` and `app/sitemap.ts` to generate absolute URLs.
 
-env already set up for you
+## Deployment
+Recommended: Vercel
+1) Set `NEXT_PUBLIC_PRODUCTION_URL` in project settings
+2) Deploy from the `production` branch
+3) Ensure required images exist in `public/` paths referenced by the UI
