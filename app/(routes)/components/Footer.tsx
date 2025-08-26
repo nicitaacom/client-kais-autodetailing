@@ -5,54 +5,65 @@ import { formatPhoneNumber } from "../utils/formatPhoneNumber"
 
 export function Footer() {
   return (
-    <footer className="bg-foreground flex flex-col laptop:flex-row justify-between items-center gap-y-4 px-4 py-2">
-      <div className="flex flex-col laptop:flex-row gap-y-2 gap-x-24">
-        {/* LOGO */}
-        <div className="w-[220px] flex justify-center items-center gap-x-2">
-          <Image className="w-[32px] h-[32px]" src="/favicon.ico" alt="logo" width={32} height={32} />
-          <h1 className="text-xl font-bold whitespace-nowrap">{businessInfo.name}</h1>
-        </div>
-
-        <div className="flex flex-col justify-center items-center laptop:items-start text-sm">
-          <h6 className="font-bold">Services:</h6>
-          <p className="text-title leading-tight">Mo-Fr: 09:00 - 17:00</p>
-          <p className="text-title leading-tight">Sat-Sun: 09:00 - 15:00</p>
-          <p className="text-title leading-tight">Need 24/7? - call +44 752 599 69 49</p>
-        </div>
-      </div>
-
-      <div className="flex flex-col laptop:flex-row gap-y-2 gap-x-8">
-        {/* ToS + Privacy Policy */}
-        <div className="flex flex-col justify-center items-center gap-y-2">
-          <Link className="text-info" href="/terms-of-service">
-            Terms of Service
-          </Link>
-          <Link className="text-info" href="/privacy-policy">
-            Privacy Policy
-          </Link>
-        </div>
-
-        {/* EMAIL + PHONE */}
-        <div className="flex flex-col justify-center items-center laptop:items-start gap-y-2">
-          <div className="flex flex-row items-center gap-x-2">
-            <Image
-              className="w-[24px] h-[24px] laptop:w-[16px] laptop:h-[16px]"
-              src="/phone.svg"
-              alt="phone"
-              width={20}
-              height={20}
-            />
-            <h6>{formatPhoneNumber(businessInfo.phone)}</h6>
+    <footer className="bg-black border-t border-red-900/30 px-6 py-8">
+      <div className="flex flex-col laptop:flex-row justify-between items-center gap-8">
+        <div className="flex flex-col laptop:flex-row gap-8 laptop:gap-16">
+          {/* LOGO */}
+          <div className="flex justify-center items-center gap-3">
+            <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">K</span>
+            </div>
+            <h1 className="text-xl font-bold text-title">{businessInfo.name}</h1>
           </div>
-          <div className="flex flex-row items-center gap-x-2">
-            <Image
-              className="w-[24px] h-[24px] laptop:w-[16px] laptop:h-[16px]"
-              src="/email.svg"
-              alt="email"
-              width={22}
-              height={16}
-            />
-            <h6>{businessInfo.email}</h6>
+
+          {/* SERVICES HOURS */}
+          <div className="flex flex-col items-center laptop:items-start">
+            <h6 className="font-bold text-red-400 mb-2">Services:</h6>
+            <div className="text-sm text-subTitle space-y-1">
+              <p>Mo-Fr: 09:00 - 17:00</p>
+              <p>Sat-Sun: 09:00 - 15:00</p>
+              <p className="text-red-400">Need 24/7? - call +44 752 599 69 49</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col laptop:flex-row gap-8">
+          {/* LEGAL LINKS */}
+          <div className="flex flex-col items-center gap-3">
+            <Link className="text-red-400 hover:text-red-300 text-sm transition-colors" href="/terms-of-service">
+              Terms of Service
+            </Link>
+            <Link className="text-red-400 hover:text-red-300 text-sm transition-colors" href="/privacy-policy">
+              Privacy Policy
+            </Link>
+          </div>
+
+          {/* CONTACT INFO */}
+          <div className="flex flex-col items-center laptop:items-start gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center">
+                <Image
+                  className="w-3 h-3 filter brightness-0 invert"
+                  src="/phone.svg"
+                  alt="phone"
+                  width={12}
+                  height={12}
+                />
+              </div>
+              <span className="text-title text-sm font-medium">{formatPhoneNumber(businessInfo.phone)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center">
+                <Image
+                  className="w-3 h-3 filter brightness-0 invert"
+                  src="/email.svg"
+                  alt="email"
+                  width={12}
+                  height={12}
+                />
+              </div>
+              <span className="text-title text-sm">{businessInfo.email}</span>
+            </div>
           </div>
         </div>
       </div>

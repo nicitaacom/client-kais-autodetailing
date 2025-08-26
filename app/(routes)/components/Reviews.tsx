@@ -14,44 +14,46 @@ interface SocialItemProps {
 }
 
 function GoogleReview({ className, usrAvatarUrl, username, date, amountOfStarts, reviewMessage }: SocialItemProps) {
-  const maxChars = 100 // Adjust this based on your 3-line estimate
+  const maxChars = 100
   const isTruncated = reviewMessage.length > maxChars
   const displayedText = isTruncated ? reviewMessage.substring(0, maxChars) + "..." : reviewMessage
 
   return (
-    <li className="w-full min-w-[325px] flex flex-col items-center gap-x-2 bg-[#303030] rounded-lg px-4 py-2">
+    <li className="min-w-[300px] flex flex-col bg-foreground-accent hover:bg-red-900/10 rounded-xl border border-red-900/20 p-4 transition-all duration-200 hover:border-red-600/30">
       {/* HEADER */}
-      <div className="w-full flex flex-col">
-        <div className="w-full flex flex-row justify-between items-center">
-          <div className="flex flex-row justify-center items-center gap-x-2">
-            <Image className="w-8 h-8" src={usrAvatarUrl} alt="usr-img" width={32} height={32} />
-            <div className="flex flex-col">
-              <h5>{username}</h5>
-              <p>{timeAgo(date)}</p>
+      <div className="flex flex-col gap-3 mb-3">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-3">
+            <Image
+              className="w-10 h-10 rounded-full border-2 border-red-900/20"
+              src={usrAvatarUrl}
+              alt="user avatar"
+              width={40}
+              height={40}
+            />
+            <div>
+              <h5 className="text-title font-semibold text-sm">{username}</h5>
+              <p className="text-subTitle text-xs">{timeAgo(date)}</p>
             </div>
           </div>
-          <Image src="/google.svg" alt="usr-img" width={16} height={16} />
+          <div className="bg-red-600/10 p-1 rounded">
+            <Image src="/google.svg" alt="google" width={16} height={16} />
+          </div>
         </div>
-        <div className="w-full flex flex-row">
+
+        <div className="flex gap-1">
           {Array(amountOfStarts)
             .fill(0)
-            .map((star, index) => (
-              <Image
-                key={`${star}-${index}-${username}-${amountOfStarts}-${usrAvatarUrl}`}
-                className="w-[22px] h-[22px] laptop:w-[20px] laptop:h-[20px]"
-                src="/star.svg"
-                alt="star"
-                width={22}
-                height={22}
-              />
+            .map((_, index) => (
+              <Image key={index} className="w-4 h-4" src="/star.svg" alt="star" width={16} height={16} />
             ))}
         </div>
       </div>
 
-      <p className="w-full text-title text-start text-sm p-1 desktop:p-0 desktop:pl-0.5">
+      <p className="text-title text-sm leading-relaxed">
         {displayedText}
         {isTruncated && (
-          <Link className="text-info inline ml-1" href={businessInfo.mapUrl}>
+          <Link className="text-red-400 hover:text-red-300 inline ml-1 font-medium" href={businessInfo.mapUrl}>
             more
           </Link>
         )}
@@ -62,10 +64,13 @@ function GoogleReview({ className, usrAvatarUrl, username, date, amountOfStarts,
 
 export function Reviews() {
   return (
-    <section className="bg-foreground rounded-lg flex flex-col gap-y-4 px-2 mobile:px-4 tablet:px-8 py-8">
-      <h1 className="text-2xl font-bold text-center">What out clients write about us</h1>
+    <section className="bg-foreground rounded-xl border border-red-900/20 p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-1 h-8 bg-red-600 rounded-full" />
+        <h1 className="text-2xl font-bold text-center">What our clients write about us</h1>
+      </div>
 
-      <ul className="max-h-[400px] overflow-x-auto flex flex-col laptop:flex-row gap-4">
+      <ul className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-red-600/20 scrollbar-track-transparent">
         {consts.reviews.map((review, index) => (
           <GoogleReview
             key={index}

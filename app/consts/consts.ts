@@ -13,14 +13,13 @@ export const consts = {
 
   // 3. Services (images + labels) for listing cards / grid
   ourServices: [
-    { imgUrl: "/services/full-detail-mobile.jpg", serviceName: "Full Detail (Mobile) - £75" },
-    { imgUrl: "/services/full-detail-dropoff.jpg", serviceName: "Full Detail (Drop-off) - £70" },
-    { imgUrl: "/services/interior-detail.jpg", serviceName: "Interior Detail (Mobile or Drop-off) - £50" },
-    { imgUrl: "/services/exterior-detail-dropoff.jpg", serviceName: "Exterior Detail (Drop-off) - £35" },
-    { imgUrl: "/services/exterior-detail-mobile.jpg", serviceName: "Exterior Detail (Mobile) - £40" },
-    { imgUrl: "/services/exterior-polish.jpg", serviceName: "Exterior Detail + Machine Polish - £135" },
+    { imgUrl: "/services/img-1.jpg", serviceName: "Full Detail (Mobile) - £75" },
+    { imgUrl: "/services/img-2.jpg", serviceName: "Full Detail (Drop-off) - £70" },
+    { imgUrl: "/services/img-3.jpg", serviceName: "Interior Detail (Mobile or Drop-off) - £50" },
+    { imgUrl: "/services/img-4.jpg", serviceName: "Exterior Detail (Drop-off) - £35" },
+    { imgUrl: "/services/img-5.jpg", serviceName: "Exterior Detail (Mobile) - £40" },
     {
-      imgUrl: "/services/full-detail-ceramic.jpg",
+      imgUrl: "/services/img-6.jpg",
       serviceName: "Full Detail + Machine Polish + Ceramic Protection - £175",
     },
   ],
@@ -61,7 +60,7 @@ export const consts = {
       usrAvatarUrl: "/reviews/Tom-Jackson.png",
       username: "Tom Jackson",
       date: "15.02.2025",
-      reviewMessage: "Great job with the exterior polish – my car shines better than showroom finish.",
+      reviewMessage: "Great job with the exterior polish - my car shines better than showroom finish.",
       amountOfStars: 5,
     },
   ],
@@ -70,30 +69,30 @@ export const consts = {
   howWeWorkTabs: [
     {
       text: "Full Detail",
-      iconSrc: "/how-do-we-work/tabs/full-detail.png",
+      iconSrc: "/how-do-we-work/tabs/magic.png",
       steps: [
         {
-          iconSrc: "/how-do-we-work/inspect.png",
+          iconSrc: "/how-do-we-work/check.png",
           title: "Initial Check",
           description: "We inspect your vehicle and note down areas needing special attention.",
         },
         {
-          iconSrc: "/how-do-we-work/exterior.png",
+          iconSrc: "/how-do-we-work/exterior-wash.png",
           title: "Exterior Wash",
           description: "Thorough safe wash, including wheels and arches.",
         },
         {
-          iconSrc: "/how-do-we-work/interior.png",
+          iconSrc: "/how-do-we-work/interior-detail.png",
           title: "Interior Clean",
           description: "Deep clean carpets, seats, plastics and vents.",
         },
         {
-          iconSrc: "/how-do-we-work/polish.png",
+          iconSrc: "/how-do-we-work/polish-icon.png",
           title: "Polish & Finish",
           description: "Polish paintwork and dress trims for a showroom finish.",
         },
         {
-          iconSrc: "/how-do-we-work/final.png",
+          iconSrc: "/how-do-we-work/100.png",
           title: "Final Walkthrough",
           description: "We review the detail with you to ensure you’re 100% satisfied.",
         },
@@ -101,30 +100,30 @@ export const consts = {
     },
     {
       text: "Ceramic Coating",
-      iconSrc: "/how-do-we-work/tabs/ceramic.png",
+      iconSrc: "/how-do-we-work/tabs/ceramic-coating-icon.png",
       steps: [
         {
-          iconSrc: "/how-do-we-work/decontaminate.png",
+          iconSrc: "/how-do-we-work/decontamination.png",
           title: "Decontamination",
           description: "Full decontamination wash including clay bar treatment.",
         },
         {
-          iconSrc: "/how-do-we-work/polish.png",
+          iconSrc: "/how-do-we-work/paint-correction.png",
           title: "Paint Correction",
           description: "Single or multi-stage machine polish to remove swirls & defects.",
         },
         {
-          iconSrc: "/how-do-we-work/apply.png",
+          iconSrc: "/how-do-we-work/shield.png",
           title: "Apply Ceramic",
           description: "Layer ceramic coating for deep gloss & hydrophobic protection.",
         },
         {
-          iconSrc: "/how-do-we-work/cure.png",
+          iconSrc: "/how-do-we-work/time.png",
           title: "Curing Time",
           description: "Allow coating to bond and cure properly for long-lasting results.",
         },
         {
-          iconSrc: "/how-do-we-work/final.png",
+          iconSrc: "/how-do-we-work/finish.png",
           title: "Inspection",
           description: "Check every panel for flawless finish.",
         },
@@ -132,32 +131,32 @@ export const consts = {
     },
     {
       text: "Interior Detail",
-      iconSrc: "/how-do-we-work/tabs/interior.png",
+      iconSrc: "/how-do-we-work/tabs/interior-detail.png",
       steps: [
         {
           iconSrc: "/how-do-we-work/vacuum.png",
           title: "Vacuum",
-          description: "Deep vacuum of carpets, mats, and seats.",
+          description: "Thorough vacuum for carpets, mats, and seats — every crumb gone.",
         },
         {
           iconSrc: "/how-do-we-work/shampoo.png",
           title: "Shampoo & Extraction",
-          description: "Remove stains and odours with fabric shampoo and extraction.",
+          description: "Stubborn stains and odours lifted with deep shampoo & hot-water extraction.",
         },
         {
-          iconSrc: "/how-do-we-work/leather.png",
+          iconSrc: "/how-do-we-work/streeing-wheel.png",
           title: "Leather Care",
-          description: "Clean and condition leather seats and trims.",
+          description: "Leather seats and trims cleansed, conditioned, and revived.",
         },
         {
-          iconSrc: "/how-do-we-work/dashboard.png",
+          iconSrc: "/how-do-we-work/vents.png",
           title: "Detailing",
-          description: "Clean vents, dashboard, and crevices with precision.",
+          description: "Dashboard, vents, and hidden crevices cleaned with precision.",
         },
         {
-          iconSrc: "/how-do-we-work/final.png",
+          iconSrc: "/how-do-we-work/perfection.png",
           title: "Final Touches",
-          description: "Air freshener and presentation check before handover.",
+          description: "Air freshener and presentation check for absolute perfection.",
         },
       ],
     },

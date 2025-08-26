@@ -2,9 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-
 import { consts } from "@/consts/consts"
-import { TSelectedTab, selectedTabOptions } from "@/consts/howDoWeWork"
 
 function Tab({
   selectedTab,
@@ -12,77 +10,77 @@ function Tab({
   iconSrc,
   onClick,
 }: {
-  selectedTab: TSelectedTab
-  buttonText: TSelectedTab
+  selectedTab: string
+  buttonText: string
   iconSrc: string
-  onClick: (tab: TSelectedTab) => void
+  onClick: (tab: string) => void
 }) {
   const isSelected = selectedTab === buttonText
 
   return (
     <button
       onClick={() => onClick(buttonText)}
-      className={`tablet:w-fit flex flex-row justify-center tablet:justify-start items-center gap-x-1 px-2 py-1 rounded text-title uppercase border duration-75
-        ${isSelected ? "bg-foreground text-background" : "bg-background text-foreground"}`}>
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm uppercase transition-all duration-200 border ${
+        isSelected
+          ? "bg-red-600 text-white border-red-600 shadow-lg"
+          : "bg-foreground-accent text-subTitle border-red-900/20 hover:border-red-600/50 hover:text-title"
+      }`}>
       {buttonText}
-      <Image className="w-[20px] h-[20px]" src={iconSrc} alt="icon" width={20} height={20} />
+      <Image
+        className={`w-4 h-4 transition-all ${isSelected ? "filter brightness-0 invert" : ""}`}
+        src={iconSrc}
+        alt="icon"
+        width={16}
+        height={16}
+      />
     </button>
   )
 }
 
 export function HowDoWeWork() {
-  const [selectedTab, setSelectedTab] = useState<TSelectedTab>(selectedTabOptions[0])
+  const [selectedTab, setSelectedTab] = useState<string>(consts.howWeWorkTabs[0]?.text || "")
 
-  // Handler for tab click
-  const handleTabClick = (tab: TSelectedTab) => {
-    setSelectedTab(tab)
-  }
-
-  // Get the content for the selected tab
+  const handleTabClick = (tab: string) => setSelectedTab(tab)
   const selectedTabContent = consts.howWeWorkTabs.find(tab => tab.text === selectedTab)
 
   return (
-    <div className="py-8">
-      <h3 className="text-2xl mb-6">
-        How do we <b>work?</b>
-      </h3>
+    <div className="bg-foreground rounded-xl border border-red-900/20 p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-1 h-8 bg-red-600 rounded-full" />
+        <h3 className="text-2xl text-title">
+          How do we <span className="font-bold">work?</span>
+        </h3>
+      </div>
 
       {/* Tabs */}
-      <ul className="flex flex-col mobile:flex-row flex-wrap gap-2 mb-6">
+      <ul className="flex flex-wrap gap-3 mb-6">
         {consts.howWeWorkTabs.map(tab => (
           <li key={`tab-${tab.text}`}>
-            <Tab
-              selectedTab={selectedTab}
-              buttonText={tab.text as TSelectedTab}
-              iconSrc={tab.iconSrc}
-              onClick={handleTabClick}
-            />
+            <Tab selectedTab={selectedTab} buttonText={tab.text} iconSrc={tab.iconSrc} onClick={handleTabClick} />
           </li>
         ))}
       </ul>
 
-      {/* Display steps for selected tab */}
+      {/* Steps */}
       {selectedTabContent && (
-        <div className="mt-6">
-          {/* Decided to comment it */}
-          {/* <h4 className="text-xl mb-4">{selectedTabContent.text} Process:</h4> */}
-
-          <div className="flex flex-col laptop:flex-row flex-wrap gap-4">
-            {selectedTabContent.steps.map((step, index) => (
-              <div
-                className="laptop:w-[300px] bg-background flex flex-col gap-y-2 border rounded p-4"
-                key={`step-${index}`}>
-                <div className="flex items-center gap-x-2">
-                  {step.iconSrc && step.iconSrc !== "/" && (
-                    <Image className="w-auto h-auto" src={step.iconSrc} alt={step.title} width={32} height={32} />
+        <div className="grid gap-4 laptop:grid-cols-2 desktop:grid-cols-3">
+          {selectedTabContent.steps.map((step, index) => (
+            <div
+              className="bg-foreground-accent hover:bg-red-900/10 rounded-xl border border-red-900/20 p-4 transition-all duration-200 hover:border-red-600/30"
+              key={`step-${index}`}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-red-600/20 rounded-lg flex items-center justify-center">
+                  {step.iconSrc && step.iconSrc !== "/" ? (
+                    <Image className="w-5 h-5" src={step.iconSrc} alt={step.title} width={20} height={20} />
+                  ) : (
+                    <span className="text-red-600 font-bold text-sm">{index + 1}</span>
                   )}
-                  <h5 className="font-bold">{step.title}</h5>
                 </div>
-
-                <p className="text-sm">{step.description}</p>
+                <h5 className="font-bold text-title">{step.title}</h5>
               </div>
-            ))}
-          </div>
+              <p className="text-sm text-subTitle leading-relaxed">{step.description}</p>
+            </div>
+          ))}
         </div>
       )}
     </div>
