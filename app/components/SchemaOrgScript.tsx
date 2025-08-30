@@ -13,10 +13,10 @@ const SchemaOrgScript = () => {
     address: {
       "@type": "PostalAddress",
       streetAddress: businessInfo.address,
-      addressLocality: businessInfo.city,
-      addressRegion: businessInfo.county,
-      postalCode: businessInfo.postalCode,
-      addressCountry: businessInfo.country,
+      addressLocality: businessInfo.address.city,
+      addressRegion: businessInfo.address.county,
+      postalCode: businessInfo.address.postalCode,
+      addressCountry: businessInfo.address.country,
     },
     geo: {
       "@type": "GeoCoordinates",

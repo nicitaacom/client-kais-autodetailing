@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { consts } from "@/consts/consts"
+import { businessInfo } from "@/consts/businessInfo"
 
 export function GoogleReviews() {
   return (
@@ -14,7 +14,7 @@ export function GoogleReviews() {
       <div className="ml-2 flex flex-col items-center">
         <p className="text-title text-sm font-medium">Google Reviews</p>
         <div className="w-full flex flex-row items-center">
-          <p className="text-title mr-1 text-lg font-bold">{consts.gmRating}</p>
+          <p className="text-title mr-1 text-lg font-bold">{businessInfo.rating.googleMaps}</p>
           {Array(5)
             .fill(0)
             .map((_, index) => (
