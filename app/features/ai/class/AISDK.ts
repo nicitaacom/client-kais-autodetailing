@@ -13,12 +13,8 @@ interface ImageGenerationResponse {
 
 export class AISDK {
   // 1. Get AI recommendation from server action
-  static async getRecommendation(
-    carModel: string,
-    userNeeds: string,
-    carImage: File | null,
-  ): Promise<RecommendationResponse | string> {
-    const result = await getAIRecommendationAction(carModel, userNeeds, carImage)
+  static async getRecommendation(carModel: string, userNeeds: string): Promise<RecommendationResponse | string> {
+    const result = await getAIRecommendationAction(carModel, userNeeds)
     return result
   }
 

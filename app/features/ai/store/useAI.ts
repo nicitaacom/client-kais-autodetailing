@@ -2,7 +2,6 @@ import { create } from "zustand"
 
 interface AIStates {
   carModel: string
-  carImage: File | null
   userNeeds: string
   aiRecommendation: string
   beforeImage: string
@@ -14,7 +13,6 @@ interface AIStates {
 
 interface AISetters {
   setCarModel: (model: string) => void
-  setCarImage: (image: File | null) => void
   setUserNeeds: (needs: string) => void
   setAIRecommendation: (recommendation: string) => void
   setBeforeImage: (url: string) => void
@@ -30,7 +28,6 @@ type AIStore = AIStates & AISetters
 
 const initialState: AIStates = {
   carModel: "",
-  carImage: null,
   userNeeds: "",
   aiRecommendation: "",
   beforeImage: "",
@@ -45,7 +42,6 @@ export const useAI = create<AIStore>(set => ({
 
   // 1. State setters
   setCarModel: model => set({ carModel: model }),
-  setCarImage: image => set({ carImage: image }),
   setUserNeeds: needs => set({ userNeeds: needs }),
   setAIRecommendation: recommendation => set({ aiRecommendation: recommendation }),
   setBeforeImage: url => set({ beforeImage: url }),

@@ -4,7 +4,7 @@
 import { ChangeEvent, useRef, useState } from "react"
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider"
 import { motion, AnimatePresence } from "framer-motion"
-import { FiUpload, FiMessageSquare, FiImage, FiAlertCircle, FiX } from "react-icons/fi"
+import { FiMessageSquare, FiImage, FiAlertCircle, FiX } from "react-icons/fi"
 import { FaCar } from "react-icons/fa"
 import { AiOutlineLoading3Quarters } from "react-icons/ai"
 
@@ -14,7 +14,6 @@ import { AISDK } from "@/features/ai/class/AISDK"
 export function AICarService() {
   const {
     carModel,
-    carImage,
     userNeeds,
     aiRecommendation,
     beforeImage,
@@ -23,7 +22,6 @@ export function AICarService() {
     error,
     step,
     setCarModel,
-    setCarImage,
     setUserNeeds,
     setAIRecommendation,
     setBeforeImage,
@@ -39,16 +37,6 @@ export function AICarService() {
   const [direction, setDirection] = useState(0)
   const userNeedsReference = useRef<HTMLTextAreaElement>(null)
 
-  // 1. handle car image upload
-  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>): void => {
-    const file = event.target.files?.[0]
-    if (!file) return
-    const validationError = AISDK.validateImageFile?.(file) ?? null
-    if (validationError) return void setError(validationError)
-    setCarImage(file)
-    clearError()
-  }
-
   // 2. get recommendation
   const getAIRecommendation = async (): Promise<void> => {
     const modelError = AISDK.validateCarModel?.(carModel) ?? null
@@ -57,12 +45,12 @@ export function AICarService() {
     if (needsError) return void setError(needsError)
     setLoading(true)
     clearError()
-    const result = await AISDK.getRecommendation(carModel, userNeeds, carImage)
+
+    const result = await AISDK.getRecommendation(carModel, userNeeds)
     if (typeof result === "string") return void (setError(result), setLoading(false))
     if (AISDK.isRecommendationResponse?.(result)) {
       setAIRecommendation(result.recommendation)
       setLoading(false)
-      setStep(2)
       if (result.recommendation.includes("?")) {
         setAllowEditNeeds(true)
         userNeedsReference.current?.focus()
@@ -75,6 +63,8 @@ export function AICarService() {
         setAllowEditNeeds(false)
         setHighlightNeeds(false)
       }
+      setDirection(1)
+      setStep(2)
     }
   }
 
@@ -82,11 +72,12 @@ export function AICarService() {
   const generateImages = async (): Promise<void> => {
     setLoading(true)
     clearError()
-    const result = await AISDK.generateImages(carModel, aiRecommendation, !!carImage)
+    const result = await AISDK.generateImages(carModel, aiRecommendation, false)
     if (typeof result === "string") return void (setError(result), setLoading(false))
     if (AISDK.isImageGenerationResponse?.(result)) {
       setBeforeImage(result.beforeImage)
       setAfterImage(result.afterImage)
+      setDirection(1)
       setStep(3)
     }
     setLoading(false)
@@ -107,7 +98,6 @@ export function AICarService() {
     visible: { x: 0, opacity: 1, transition: { duration: 0.3 } },
     exit: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0, transition: { duration: 0.3 } }),
   }
-  const fileLabel = carImage ? carImage.name : "Upload image"
   const steps: { id: 1 | 2 | 3; label: string }[] = [
     { id: 1, label: "Vehicle" },
     { id: 2, label: "Recommendation" },
@@ -212,36 +202,17 @@ export function AICarService() {
               <FaCar className="text-brand text-lg" />
               <h3 className="text-lg tablet:text-xl font-semibold text-title">Step 1: Your Vehicle</h3>
             </div>
-            <div className="grid grid-cols-1 mobile:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-subTitle mb-1 text-sm">Car Model *</label>
-                <motion.input
-                  className="w-full bg-background border border-border-color rounded-md px-3 py-2 text-title focus:border-brand focus:outline-none transition-colors"
-                  placeholder="e.g., Tesla Model 3, BMW X5"
-                  value={carModel}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCarModel(event.target.value)}
-                  disabled={loading}
-                  whileFocus={{ scale: 1.01 }}
-                  transition={{ duration: 0.14 }}
-                />
-              </div>
-              <div>
-                <label className="block text-subTitle mb-1 text-sm">Vehicle Image (Optional)</label>
-                <motion.label
-                  className="flex items-center justify-center w-full bg-background border border-border-color border-dashed rounded-md px-3 py-2 cursor-pointer hover:border-brand transition-colors"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}>
-                  <FiUpload className="text-brand mr-1.5" />
-                  <span className="text-title">{fileLabel}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    disabled={loading}
-                  />
-                </motion.label>
-              </div>
+            <div>
+              <label className="block text-subTitle mb-1 text-sm">Car Model *</label>
+              <motion.input
+                className="w-full bg-background border border-border-color rounded-md px-3 py-2 text-title focus:border-brand focus:outline-none transition-colors"
+                placeholder="e.g., Tesla Model 3, BMW X5"
+                value={carModel}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCarModel(event.target.value)}
+                disabled={loading}
+                whileFocus={{ scale: 1.01 }}
+                transition={{ duration: 0.14 }}
+              />
             </div>
             <div className="mt-3">
               <label className="block text-subTitle mb-1 text-sm">What do you want? *</label>
@@ -296,42 +267,21 @@ export function AICarService() {
               }}
             />
             {allowEditNeeds && (
-              <>
-                <div className="mt-3">
-                  <label className="block text-subTitle mb-1 text-sm">Update your needs *</label>
-                  <motion.textarea
-                    ref={userNeedsReference}
-                    className={`w-full bg-background border border-border-color rounded-md px-3 py-2 text-title focus:border-brand focus:outline-none h-20 resize-none transition-colors ${
-                      highlightNeeds ? "border-brand shadow-brand/50" : ""
-                    }`}
-                    placeholder="Describe - paint correction, ceramic coating, interior deep clean, etc."
-                    value={userNeeds}
-                    onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setUserNeeds(event.target.value)}
-                    disabled={loading}
-                    whileFocus={{ scale: 1.01 }}
-                    transition={{ duration: 0.14 }}
-                  />
-                </div>
-                {!carImage && (
-                  <div className="mt-3">
-                    <label className="block text-subTitle mb-1 text-sm">Vehicle Image (Optional)</label>
-                    <motion.label
-                      className="flex items-center justify-center w-full bg-background border border-border-color border-dashed rounded-md px-3 py-2 cursor-pointer hover:border-brand transition-colors"
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.98 }}>
-                      <FiUpload className="text-brand mr-1.5" />
-                      <span className="text-title">{fileLabel}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                        disabled={loading}
-                      />
-                    </motion.label>
-                  </div>
-                )}
-              </>
+              <div className="mt-3">
+                <label className="block text-subTitle mb-1 text-sm">Update your needs *</label>
+                <motion.textarea
+                  ref={userNeedsReference}
+                  className={`w-full bg-background border border-border-color rounded-md px-3 py-2 text-title focus:border-brand focus:outline-none h-20 resize-none transition-colors ${
+                    highlightNeeds ? "border-brand shadow-brand/50" : ""
+                  }`}
+                  placeholder="Describe - paint correction, ceramic coating, interior deep clean, etc."
+                  value={userNeeds}
+                  onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setUserNeeds(event.target.value)}
+                  disabled={loading}
+                  whileFocus={{ scale: 1.01 }}
+                  transition={{ duration: 0.14 }}
+                />
+              </div>
             )}
             <div className="flex flex-col mobile:flex-row gap-2 mt-3">
               {allowEditNeeds ? (
