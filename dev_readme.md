@@ -9,3 +9,12 @@ Other // TODO
 Checklist:
 package.json
 consts
+
+Prompt
+
+```
+UI looks minimalistic in red&black
+
+tailwind.config.ts
+
+```

@@ -1,3 +1,4 @@
+import { AICarService } from "./components/AICarService"
 import { ContactUsForm } from "./components/ContactUsForm"
 import { Footer } from "./components/Footer"
 import { Header } from "./components/Header/Header"
@@ -16,6 +17,7 @@ export default function Page() {
           <HowWeCanHelpYou />
           <ContactUsForm />
         </section>
+        <AICarService />
         <Reviews />
         <HowDoWeWork />
       </div>

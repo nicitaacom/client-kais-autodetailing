@@ -47,7 +47,8 @@ input {
 }
 
 p,
-span {
+span,
+li {
   color: hsl(var(--subTitle));
 }
 
@@ -79,9 +80,9 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #1c2d82;
+  background-color: #6d1e1e;
   border-radius: 16px; /* This works for Webkit browsers */
-  border: 2px inset #ff6666;
+  border: 2px inset #991700;
 }
 
 *::-webkit-scrollbar-thumb:hover {

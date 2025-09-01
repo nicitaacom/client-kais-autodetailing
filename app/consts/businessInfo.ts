@@ -37,12 +37,53 @@ export const businessInfo = {
 
   // 4. High-level services (used for meta / schema)
   primaryServices: [
-    "Full Detail (Mobile)",
-    "Full Detail (Drop-off)",
-    "Interior Detail",
-    "Exterior Detail",
-    "Machine Polish",
-    "Ceramic Coating & Protection",
+    {
+      name: "Full Detail (Mobile)",
+      includes: [
+        "Exterior wash",
+        "Wax",
+        "Wheel & tyre clean",
+        "Vacuum (seats, carpets, trunk)",
+        "Dashboard & console clean",
+        "Glass inside & outside",
+        "Light polish",
+      ],
+    },
+    {
+      name: "Full Detail (Drop-off)",
+      includes: [
+        "Exterior wash",
+        "Wax",
+        "Wheel & tyre clean",
+        "Vacuum (seats, carpets, trunk)",
+        "Dashboard & console clean",
+        "Interior glass",
+        "Machine polish",
+      ],
+    },
+    {
+      name: "Interior Detail",
+      includes: [
+        "Vacuum (seats, carpets, trunk)",
+        "Carpet & upholstery shampoo",
+        "Leather conditioning",
+        "Dashboard & console clean",
+        "Trim & buttons detail",
+        "Glass inside",
+      ],
+    },
+    {
+      name: "Exterior Detail",
+      includes: ["Exterior wash", "Clay bar", "Wax", "Wheel & tyre clean", "Glass outside"],
+    },
+    {
+      name: "Machine Polish",
+      includes: ["Exterior wash", "Clay bar", "Machine polish", "Gloss enhancement", "Sealant"],
+    },
+    {
+      name: "Ceramic Coating & Protection",
+      includes: ["Exterior wash", "Clay bar", "Machine polish", "Ceramic coating"],
+    },
   ],
 
   // 5. socials & business meta
