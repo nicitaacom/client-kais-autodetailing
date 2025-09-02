@@ -79,7 +79,7 @@ Instagram: ${businessInfo.instagramUrl}`
     const userContent = `Car: ${carModel}
     Needs: ${userNeeds}`
 
-    console.log(96, "userContent - ", userContent)
+    // console.log(96, "userContent - ", userContent)
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -93,7 +93,7 @@ Instagram: ${businessInfo.instagramUrl}`
 
     const recommendation = completion.choices?.[0]?.message?.content?.trim()
     if (!recommendation) return "Failed to generate recommendation"
-    console.log(98, "recommendation - ", recommendation)
+    // console.log(98, "recommendation - ", recommendation)
     return { recommendation }
   } catch (error) {
     console.error("AI recommendation error:", error)

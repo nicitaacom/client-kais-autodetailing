@@ -3,12 +3,14 @@ import { createClient } from "@supabase/supabase-js"
 import Calendar from "react-calendar"
 import "react-calendar/dist/Calendar.css"
 import moment from "moment-timezone"
+import { motion } from "framer-motion"
+import { FiAlertCircle, FiX } from "react-icons/fi"
+
 import { useAppointmentStore, type TAppointment } from "./useAppointmentStore"
 import BookedAppointments from "./BookedAppointments"
 import { rescheduleAppointmentFn } from "./functions/rescheduleAppointmentFn"
-import { motion } from "framer-motion"
-import { FiAlertCircle, FiX } from "react-icons/fi"
 import { bookACallFn } from "./functions/bookACallFn"
+import { generateAvailableTimes } from "./functions/generateAvailableTimesFn"
 
 moment.tz.setDefault("Europe/London")
 
@@ -29,11 +31,15 @@ function setCookie(name: string, value: string, days: number) {
   document.cookie = name + "=" + (value || "") + expires + "; path=/"
 }
 
-type CalendarContainerProps = {
-  availableTimes: moment.Moment[]
+type BusinessHours = {
+  [key: string]: { opens: string; closes: string }
 }
 
-export default function CalendarContainer({ availableTimes }: CalendarContainerProps) {
+type CalendarContainerProps = {
+  businessHours: BusinessHours
+}
+
+export default function CalendarContainer({ businessHours }: CalendarContainerProps) {
   const {
     selectedDate,
     selectedTime,
@@ -51,6 +57,42 @@ export default function CalendarContainer({ availableTimes }: CalendarContainerP
     setError,
     setUserId,
   } = useAppointmentStore()
+
+  const availableTimes = generateAvailableTimes(
+    businessHours,
+    appointments.map(appt => moment.tz(`${appt.date} ${appt.time}`, "YYYY-MM-DD HH:mm", appt.timezone)),
+  )
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    // 1. Get or set userId from cookie
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`
+      const parts = value.split(`; ${name}=`)
+      return parts.length === 2 ? parts.pop()?.split(";").shift() || null : null
+    }
+    const setCookie = (name: string, value: string, days: number) => {
+      let expires = ""
+      if (days) {
+        const date = new Date()
+        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000)
+        expires = "; expires=" + date.toUTCString()
+      }
+      document.cookie = name + "=" + (value || "") + expires + "; path=/"
+    }
+    let cookieUserId = getCookie("user_id")
+    if (!cookieUserId) {
+      cookieUserId = crypto.randomUUID()
+      setCookie("user_id", cookieUserId, 365)
+    }
+    setUserId(cookieUserId)
+    // 2. Fetch user-specific appointments
+    async function fetchAppts() {
+      const { data, error } = await supabase.from("appointments").select("*").eq("user_id", cookieUserId)
+      error ? console.error(error) : setAppointments(data || [])
+    }
+    fetchAppts()
+  }, [setAppointments, setUserId])
 
   useEffect(() => {
     if (typeof window === "undefined") return
