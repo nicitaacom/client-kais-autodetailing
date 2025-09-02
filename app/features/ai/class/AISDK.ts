@@ -1,4 +1,3 @@
-// app/features/ai/service.ts
 import { getAIRecommendationAction } from "../actions/getAIRecommendationAction"
 import { generateImagesAction } from "../actions/generateImagesAction"
 
@@ -7,8 +6,8 @@ interface RecommendationResponse {
 }
 
 interface ImageGenerationResponse {
-  beforeImage: string
-  afterImage: string
+  beforeImageUrl: string
+  afterImageUrl: string
 }
 
 export class AISDK {
@@ -19,12 +18,8 @@ export class AISDK {
   }
 
   // 2. Generate before/after images from server action
-  static async generateImages(
-    carModel: string,
-    recommendation: string,
-    hasUserImage: boolean,
-  ): Promise<ImageGenerationResponse | string> {
-    const result = await generateImagesAction(carModel, recommendation, hasUserImage)
+  static async generateImages(carModel: string, recommendation: string): Promise<ImageGenerationResponse | string> {
+    const result = await generateImagesAction(carModel, recommendation)
     return result
   }
 

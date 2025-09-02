@@ -8,7 +8,7 @@ interface AIStates {
   afterImage: string
   loading: boolean
   error: string
-  step: 1 | 2 | 3
+  step: 1 | 2 | 3 | 4
 }
 
 interface AISetters {
@@ -19,7 +19,7 @@ interface AISetters {
   setAfterImage: (url: string) => void
   setLoading: (loading: boolean) => void
   setError: (error: string) => void
-  setStep: (step: 1 | 2 | 3) => void
+  setStep: (step: 1 | 2 | 3 | 4) => void
   resetState: () => void
   clearError: () => void
 }

@@ -1,15 +1,17 @@
 // app/components/AICarService.tsx
 "use client"
 
-import { ChangeEvent, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider"
 import { motion, AnimatePresence } from "framer-motion"
-import { FiMessageSquare, FiImage, FiAlertCircle, FiX } from "react-icons/fi"
+import { FiMessageSquare, FiImage, FiAlertCircle, FiX, FiCalendar } from "react-icons/fi"
 import { FaCar } from "react-icons/fa"
 import { AiOutlineLoading3Quarters } from "react-icons/ai"
+import { FaRegCalendarAlt } from "react-icons/fa"
 
 import { useAI } from "@/features/ai/store/useAI"
 import { AISDK } from "@/features/ai/class/AISDK"
+import CalendarContainer from "@/widgets/Calendar/CalendarContainer"
 
 export function AICarService() {
   const {
@@ -51,7 +53,10 @@ export function AICarService() {
     if (AISDK.isRecommendationResponse?.(result)) {
       setAIRecommendation(result.recommendation)
       setLoading(false)
-      if (result.recommendation.includes("?")) {
+      if (result.recommendation.includes("Do you want to book based on my recommendations")) {
+        setAllowEditNeeds(false)
+        setHighlightNeeds(false)
+      } else if (result.recommendation.includes("?")) {
         setAllowEditNeeds(true)
         userNeedsReference.current?.focus()
         setHighlightNeeds(true)
@@ -72,15 +77,21 @@ export function AICarService() {
   const generateImages = async (): Promise<void> => {
     setLoading(true)
     clearError()
-    const result = await AISDK.generateImages(carModel, aiRecommendation, false)
+    const result = await AISDK.generateImages(carModel, aiRecommendation)
     if (typeof result === "string") return void (setError(result), setLoading(false))
     if (AISDK.isImageGenerationResponse?.(result)) {
-      setBeforeImage(result.beforeImage)
-      setAfterImage(result.afterImage)
+      setBeforeImage(result.beforeImageUrl)
+      setAfterImage(result.afterImageUrl)
       setDirection(1)
       setStep(3)
     }
     setLoading(false)
+  }
+
+  // book service
+  const bookService = (): void => {
+    setDirection(1)
+    setStep(4)
   }
 
   // 4. animations & helpers
@@ -98,12 +109,13 @@ export function AICarService() {
     visible: { x: 0, opacity: 1, transition: { duration: 0.3 } },
     exit: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0, transition: { duration: 0.3 } }),
   }
-  const steps: { id: 1 | 2 | 3; label: string }[] = [
+  const steps: { id: 1 | 2 | 3 | 4; label: string }[] = [
     { id: 1, label: "Vehicle" },
     { id: 2, label: "Recommendation" },
     { id: 3, label: "Preview" },
+    { id: 4, label: "Schedule" },
   ]
-  const goToStep = (target: 1 | 2 | 3) => {
+  const goToStep = (target: 1 | 2 | 3 | 4) => {
     if (target > step) return
     setDirection(target > step ? 1 : -1)
     setStep(target)
@@ -286,7 +298,8 @@ export function AICarService() {
             <div className="flex flex-col mobile:flex-row gap-2 mt-3">
               {allowEditNeeds ? (
                 <motion.button
-                  className={`bg-brand hover:bg-brand/90 text-title-foreground px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-1.5 ${loading ? "opacity-50 cursor-default pointer-events-none" : ""}`}
+                  className={`bg-brand hover:bg-brand/90 text-title-foreground px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-1.5
+                     ${loading ? "opacity-50 cursor-default pointer-events-none" : ""}`}
                   onClick={getAIRecommendation}
                   disabled={loading}
                   whileHover={{ scale: 1.02 }}
@@ -298,30 +311,37 @@ export function AICarService() {
                   )}
                   <span className="text-black">Update Recommendation</span>
                 </motion.button>
-              ) : (
-                <>
-                  <motion.button
-                    className={`bg-brand hover:bg-brand/90 text-title-foreground px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-1.5 ${loading ? "opacity-50 cursor-default pointer-events-none" : ""}`}
-                    onClick={generateImages}
-                    disabled={loading}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.96 }}>
-                    {loading ? (
-                      <AiOutlineLoading3Quarters className="animate-spin text-title-foreground" />
-                    ) : (
-                      <FiImage className="text-title-foreground" />
-                    )}
-                    <span className="text-black">Generate Preview Images</span>
-                  </motion.button>
-                  <motion.button
-                    className="bg-foreground-accent hover:bg-foreground-accent/80 text-title px-4 py-2 rounded-md font-medium transition-colors border border-border-color"
-                    onClick={() => goToStep(1)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.96 }}>
-                    Modify Request
-                  </motion.button>
-                </>
-              )}
+              ) : null}
+              <motion.button
+                className={`bg-brand hover:bg-brand/90 text-title-foreground px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-1.5
+                   ${loading ? "opacity-50 cursor-default pointer-events-none" : ""}`}
+                onClick={generateImages}
+                disabled={loading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.96 }}>
+                {loading ? (
+                  <AiOutlineLoading3Quarters className="animate-spin text-title-foreground" />
+                ) : (
+                  <FiImage className="text-title-foreground" />
+                )}
+                <span className="text-black">Generate Preview Images</span>
+              </motion.button>
+              <motion.button
+                className="bg-brand hover:bg-brand/90 text-title-foreground flex items-center gap-1.5 px-4 py-2 rounded-md font-medium transition-colors"
+                onClick={bookService}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.96 }}>
+                <FaRegCalendarAlt />
+                Book Appointment
+              </motion.button>
+              <motion.button
+                className="bg-foreground-accent hover:bg-foreground-accent/80 text-title px-4 py-2 rounded-md font-medium transition-colors border
+                 border-border-color"
+                onClick={() => goToStep(1)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.96 }}>
+                Modify Request
+              </motion.button>
             </div>
           </motion.div>
         )}
@@ -358,6 +378,7 @@ export function AICarService() {
             <div className="flex flex-col mobile:flex-row gap-2 mt-3">
               <motion.button
                 className="bg-brand hover:bg-brand/90 text-title-foreground px-4 py-2 rounded-md font-medium transition-colors"
+                onClick={bookService}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}>
                 Book This Service
@@ -370,6 +391,22 @@ export function AICarService() {
                 Start Over
               </motion.button>
             </div>
+          </motion.div>
+        )}
+        {step === 4 && (
+          <motion.div
+            key="step4"
+            className="bg-foreground rounded-md p-4 border border-border-color"
+            variants={stepVariants}
+            custom={direction}
+            initial="hidden"
+            animate="visible"
+            exit="exit">
+            <div className="flex items-center gap-2 mb-3">
+              <FiCalendar className="text-brand text-lg" />
+              <h3 className="text-lg tablet:text-xl font-semibold text-title">Step 4: Schedule Appointment</h3>
+            </div>
+            <CalendarContainer />
           </motion.div>
         )}
       </AnimatePresence>

@@ -3,7 +3,7 @@
 
 import openai from "@/libs/openai"
 
-export async function generateImagesAction(carModel: string, recommendation: string, hasUserImage: boolean) {
+export async function generateImagesAction(carModel: string, recommendation: string) {
   try {
     if (!carModel || !recommendation) return "Car model and recommendation are required"
 
@@ -41,12 +41,14 @@ export async function generateImagesAction(carModel: string, recommendation: str
     ])
 
     // 4. Extract URLs safely
-    const beforeImage = beforeResponse?.data?.[0]?.url
-    const afterImage = afterResponse?.data?.[0]?.url
+    const beforeImageUrl = beforeResponse?.data?.[0]?.url
+    const afterImageUrl = afterResponse?.data?.[0]?.url
+    console.log(47, "beforeImageUrl - ", beforeImageUrl)
+    console.log(46, "afterImageUrl - ", afterImageUrl)
 
-    if (!beforeImage || !afterImage) return "Failed to generate images"
+    if (!beforeImageUrl || !afterImageUrl) return "Failed to generate images"
 
-    return { beforeImage, afterImage }
+    return { beforeImageUrl, afterImageUrl }
   } catch (error) {
     console.error("Image generation error:", error)
     return "Internal server error"

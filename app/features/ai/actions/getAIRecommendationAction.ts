@@ -34,23 +34,25 @@ export async function getAIRecommendationAction(
 4. Once user specified his needs (inside or outside or both) then you reply based on user needs
    Needs: I just want to make it as new. Inside
    Response:
-<h3 class="text-danger font-bold text-lg tablet:text-xl">My recommendation:</h3>
-<div class="flex flex-col gap-y-4">
+<div class="flex flex-col gap-y-4 mt-4">
   <h3 class="text-danger font-bold text-lg tablet:text-xl mb-3 tablet:mb-4">Interior services:</h3>
   <div class="flex flex-col">
-    <strong class="block tablet:inline">• Vacuum</strong>
+    <strong class="text-brand block tablet:inline">• Vacuum</strong>
     <span class="block tablet:inline tablet:ml-1 tablet:before:content-['-']">
       removes dirt, dust and grime from seats, carpets, trunk, dashboard
     </span>
   </div>
   <div class="flex flex-col">
-    <strong class="block tablet:inline">• Carpet &amp; upholstery shampoo</strong>
+    <strong class="text-brand block tablet:inline">• Carpet &amp; upholstery shampoo</strong>
     <span class="block tablet:inline tablet:ml-1 tablet:before:content-['-']">
       [include benefits of this]
     </span>
   </div>
   <!-- continue with what it includes and benefits of it -->
 </div>
+<p style="margin-top:16px">
+  <em>Do you want to book based on my recommendations or would you like to add/remove something?</em>
+</p>
 
 Business info and FAQ:
 Name: ${businessInfo.name}
