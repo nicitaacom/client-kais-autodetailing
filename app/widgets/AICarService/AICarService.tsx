@@ -13,7 +13,6 @@ import { useAI } from "@/features/ai/store/useAI"
 import { AISDK } from "@/features/ai/class/AISDK"
 import CalendarContainer from "@/widgets/Calendar/CalendarContainer"
 import { businessInfo } from "@/consts/businessInfo"
-import { generateAvailableTimes } from "../Calendar/functions/generateAvailableTimesFn"
 
 export function AICarService() {
   const {
@@ -408,7 +407,12 @@ export function AICarService() {
               <FiCalendar className="text-brand text-lg" />
               <h3 className="text-lg tablet:text-xl font-semibold text-title">Step 4: Schedule Appointment</h3>
             </div>
-            <CalendarContainer businessHours={businessInfo.businessHours} />
+            <CalendarContainer
+              businessHours={businessInfo.businessHours}
+              maxBookingDaysInAdvance={28}
+              defaultTimezone={businessInfo.timezone}
+              phonePlaceholder="e.g +44 123 456 78 90"
+            />
           </motion.div>
         )}
       </AnimatePresence>

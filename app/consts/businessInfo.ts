@@ -4,6 +4,7 @@ export const businessInfo = {
   yearsInBusiness: 1, // numeric for easy usage in UI
   yearsOfGuarantee: 1, // satisfaction guarantee in years
   phone: "+44 7765 441559",
+  timezone: "Europe/London",
   email: "14enhancements@gmail.com",
   websiteUrl: "https://kais-autodetailing.com",
   yellPagesUrl: "",

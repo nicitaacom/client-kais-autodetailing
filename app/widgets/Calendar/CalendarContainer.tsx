@@ -8,13 +8,14 @@ import moment from "moment-timezone"
 import { motion } from "framer-motion"
 import { FiAlertCircle, FiX } from "react-icons/fi"
 
-import { useAppointmentStore, type TAppointment } from "./useAppointmentStore"
+import { useAppointmentStore } from "./useAppointmentStore"
 import BookedAppointments from "./BookedAppointments"
 import { rescheduleAppointmentFn } from "./functions/rescheduleAppointmentFn"
 import { bookACallFn } from "./functions/bookACallFn"
-import { generateAvailableTimes } from "./functions/generateAvailableTimesFn"
-
-moment.tz.setDefault("Europe/London")
+import { useDebounce } from "./hooks/useDebounce"
+import { validateEmail } from "./utils/validateEmailFn"
+import { selectDBAppointmentsAction } from "./actions/selectAppointmentsAction"
+import { IDBAppointment } from "./types/IDBAppointment"
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
@@ -34,47 +35,57 @@ function setCookie(name: string, value: string, days: number) {
   document.cookie = name + "=" + (value || "") + expires + "; path=/"
 }
 
+function generateAvailableTimes(businessHours: BusinessHours, bookedTimes: moment.Moment[], maxDays: number) {
+  const times: moment.Moment[] = []
+  const start = moment().startOf("day")
+  const end = moment().add(maxDays, "days").endOf("day")
+  for (let day = start.clone(); day.isBefore(end); day.add(1, "days")) {
+    const weekday = day.format("dddd").toLowerCase()
+    if (!businessHours[weekday]) continue
+    const { opens, closes } = businessHours[weekday]
+    let slot = moment(`${day.format("YYYY-MM-DD")} ${opens}`)
+    const closeSlot = moment(`${day.format("YYYY-MM-DD")} ${closes}`)
+    while (slot.isBefore(closeSlot)) {
+      !bookedTimes.some(b => b.isSame(slot)) && times.push(slot.clone())
+      slot.add(30, "minutes")
+    }
+  }
+  return times
+}
+
 type BusinessHours = {
   [key: string]: { opens: string; closes: string }
 }
 
 type CalendarContainerProps = {
   businessHours: BusinessHours
-  appointmentNotePlaceholder?: string
   maxBookingDaysInAdvance: number
+  defaultTimezone: string
+  appointmentNotePlaceholder?: string
   phonePlaceholder?: string
 }
 
 export default function CalendarContainer({
   businessHours,
-  appointmentNotePlaceholder = "Appointment note",
   maxBookingDaysInAdvance,
+  defaultTimezone,
+  appointmentNotePlaceholder = "Appointment note",
   phonePlaceholder = "Phone",
 }: CalendarContainerProps) {
-  const {
-    selectedDate,
-    selectedTime,
-    appointmentNote,
-    editingId,
-    appointments,
-    error,
-    userId,
-    setSelectedDate,
-    setSelectedTime,
-    setAppointmentNote,
-    setEditingId,
-    setAppointments,
-    setError,
-    setUserId,
-  } = useAppointmentStore()
+  const { firstName, setFirstName, firstNameError, setFirstNameError } = useAppointmentStore()
+  const { phone, setPhone, phoneError, setPhoneError } = useAppointmentStore()
+  const { appointmentNote, setAppointmentNote, appointmentNoteError, setAppointmentNoteError } = useAppointmentStore()
+  const { editingId, appointments, error, setEditingId, setAppointments, setError, setUserId, resetInputs } =
+    useAppointmentStore()
+  const { selectedDate, setSelectedDate, selectedTime, setSelectedTime, email, setEmail, emailError, setEmailError } =
+    useAppointmentStore()
 
-  const [firstName, setFirstName] = useState("")
-  const [phone, setPhone] = useState("")
-  const [email, setEmail] = useState("")
+  moment.tz.setDefault(defaultTimezone ?? "Europe/London")
 
   const availableTimes = generateAvailableTimes(
     businessHours,
     appointments.map(appt => moment.tz(`${appt.date} ${appt.time}`, "YYYY-MM-DD HH:mm", appt.timezone)),
+    maxBookingDaysInAdvance,
   )
 
   useEffect(() => {
@@ -88,23 +99,66 @@ export default function CalendarContainer({
     setUserId(cookieUserId)
     // 2. Fetch user-specific appointments
     async function fetchAppts() {
-      const { data, error } = await supabase.from("appointments").select("*").eq("user_id", cookieUserId)
-      error ? console.error(error) : setAppointments(data || [])
+      console.log(102, "cookieUserId - ", cookieUserId)
+      const selectResponse = await selectDBAppointmentsAction(cookieUserId)
+      selectResponse.error ? console.error(selectResponse.error) : setAppointments(selectResponse.data || [])
     }
     fetchAppts()
   }, [setAppointments, setUserId])
 
+  // 1. Validate first name (max 16 chars, a-z/A-Z)
+  const validateFirstName = (name: string) =>
+    /^[a-zA-Z]{0,16}$/.test(name) ? "" : "Name must be 16 chars max, letters only"
+
+  // 2. Validate phone (max 17 chars, + and 0-9)
+  const validatePhone = (phone: string) =>
+    /^\+?[0-9 ]{0,16}$/.test(phone) ? "" : "Phone must be 17 chars max, numbers, spaces and + only"
+
+  // 3. Handle input changes with validation
+  const handleFirstNameChange = (value: string) => {
+    setFirstName(value)
+    setFirstNameError(validateFirstName(value))
+  }
+
+  const handlePhoneChange = (value: string) => {
+    setPhone(value)
+    setPhoneError(validatePhone(value))
+  }
+
+  const handleAppointmentNoteChange = (value: string) => {
+    const trimmed = value.slice(0, 300)
+    setAppointmentNote(trimmed)
+    setAppointmentNoteError(trimmed.length === 300 ? "Note limited to 300 characters" : "")
+  }
+
   const handleBook = async () => {
+    // 1. Validate inputs
     if (!firstName || !phone) return setError("First name and phone required")
-    // 1. Validate date is not in the past
+    if (firstNameError || phoneError || appointmentNoteError) return setError("Please fix input errors")
+    // 2. Validate date is not in the past
     const selected = moment(selectedDate).startOf("day")
     const today = moment().startOf("day")
     if (selected.isBefore(today)) return setError("Cannot book past dates")
-    // 2. Book or reschedule
-    editingId ? await rescheduleAppointmentFn(editingId) : await bookACallFn()
-    // 3. Refresh appointments
-    const { data, error } = await supabase.from("appointments").select("*").eq("user_id", userId)
-    error ? setError(error.message) : (setAppointments(data || []), setEditingId(null))
+    // 3. Book or reschedule
+
+    if (editingId) {
+      const response = await rescheduleAppointmentFn(editingId)
+      if (typeof response === "object") {
+        setAppointments(
+          appointments.map(appt =>
+            appt.id === editingId ? { ...response, id: appt.id, created_at: appt.created_at } : appt,
+          ),
+        )
+        setEditingId(null)
+        resetInputs()
+      }
+    } else {
+      const response = await bookACallFn()
+      if (typeof response === "object") {
+        setAppointments([...appointments, response])
+        resetInputs()
+      }
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -112,11 +166,19 @@ export default function CalendarContainer({
     error ? setError("Error deleting") : setAppointments(appointments.filter(a => a.id !== id))
   }
 
-  const handleEdit = (appt: TAppointment) => {
+  const handleEdit = (appt: IDBAppointment) => {
+    // 1. Pre-fill form with existing appointment data
     setSelectedDate(appt.date)
     setSelectedTime(appt.time)
-    setAppointmentNote(appt.note)
+    setAppointmentNote(appt.note || "")
+    setFirstName(appt.first_name)
+    setPhone(appt.phone)
+    setEmail(appt.email || "")
     setEditingId(appt.id)
+    // 2. Validate pre-filled data
+    setFirstNameError(validateFirstName(appt.first_name))
+    setPhoneError(validatePhone(appt.phone))
+    setAppointmentNoteError(appt.note?.length === 300 ? "Note limited to 300 characters" : "")
   }
 
   const isDateAvailable = (date: Date) => {
@@ -129,6 +191,18 @@ export default function CalendarContainer({
       availableTimes.some(time => momentDate.isSame(time, "day"))
     )
   }
+
+  const debouncedEmail = useDebounce(email, 500)
+
+  // 4. Clear email error
+  useEffect(() => {
+    if (!debouncedEmail) {
+      setEmailError("")
+      return
+    }
+    const result = validateEmail(debouncedEmail)
+    setEmailError(result === true ? "" : result)
+  }, [debouncedEmail, setEmailError])
 
   const filteredTimes = selectedDate ? availableTimes.filter(time => moment(time).isSame(selectedDate, "day")) : []
 
@@ -214,6 +288,10 @@ export default function CalendarContainer({
           background: hsl(var(--brand)) !important;
           color: hsl(var(--title-foreground)) !important;
         }
+        .react-calendar__tile--active:hover {
+          background: hsl(var(--brand)) !important;
+          color: hsl(var(--title-foreground)) !important;
+        }
         .react-calendar__tile:disabled {
           background: hsl(var(--foreground) / 0.5) !important;
           color: hsl(var(--subTitle) / 0.4) !important;
@@ -245,71 +323,105 @@ export default function CalendarContainer({
           formatMonthYear={(locale, date) => moment(date).format("MMM YYYY")}
         />
 
-        <div>
+        <div className="flex flex-col">
           <p className="text-subTitle mb-3">{selectedDate ? "Available times" : "Select a date"}</p>
-          {selectedDate ? (
-            filteredTimes.length ? (
-              <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-2">
-                {filteredTimes.map(time => (
-                  <button
-                    key={time.format()}
-                    onClick={() => setSelectedTime(time.format("HH:mm"))}
-                    className={`px-3 py-2 text-sm rounded transition-colors ${
-                      selectedTime === time.format("HH:mm")
-                        ? "bg-brand text-title-foreground"
-                        : "bg-background text-title border border-border-color hover:bg-brand/10"
-                    }`}>
-                    {time.format("h:mm A")}
-                  </button>
-                ))}
-              </div>
+          <div className="flex-1 min-h-[320px]">
+            {selectedDate ? (
+              filteredTimes.length ? (
+                <div className="grid grid-cols-3 gap-2 h-full overflow-y-auto pr-2 content-start">
+                  {filteredTimes.map(time => (
+                    <button
+                      key={time.format()}
+                      onClick={() => setSelectedTime(time.format("HH:mm"))}
+                      className={`px-3 py-2 text-sm rounded transition-colors h-fit ${
+                        selectedTime === time.format("HH:mm")
+                          ? "bg-brand text-title-foreground"
+                          : "bg-background text-title border border-border-color hover:bg-brand/10"
+                      }`}>
+                      {time.format("h:mm A")}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-subTitle">No available times</p>
+                </div>
+              )
             ) : (
-              <p className="text-subTitle">No available times</p>
-            )
-          ) : null}
+              <div className="flex items-center justify-center h-full">
+                <p className="text-subTitle">Select a date to view available times</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="grid tablet:grid-cols-2 gap-3 mb-4">
-        <input
-          className="bg-background border border-border-color rounded px-3 py-2 text-title"
-          type="text"
-          value={firstName}
-          onChange={e => setFirstName(e.target.value)}
-          placeholder="First name"
-        />
-        <input
-          className="bg-background border border-border-color rounded px-3 py-2 text-title"
-          type="tel"
-          value={phone}
-          onChange={e => setPhone(e.target.value)}
-          placeholder={phonePlaceholder}
-        />
+        <div>
+          <input
+            className="bg-background border border-border-color rounded px-3 py-2 text-title w-full"
+            type="text"
+            value={firstName}
+            onChange={e => handleFirstNameChange(e.target.value)}
+            placeholder="First name"
+          />
+          {firstNameError && <p className="text-danger text-sm mt-1">{firstNameError}</p>}
+        </div>
+        <div>
+          <input
+            className="bg-background border border-border-color rounded px-3 py-2 text-title w-full"
+            type="tel"
+            value={phone}
+            onChange={e => handlePhoneChange(e.target.value)}
+            placeholder={phonePlaceholder}
+          />
+          {phoneError && <p className="text-danger text-sm mt-1">{phoneError}</p>}
+        </div>
       </div>
 
-      <input
-        className="bg-background border border-border-color rounded px-3 py-2 w-full mb-3 text-title"
-        type="email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        placeholder="Email (optional)"
-      />
+      <div className="mb-3">
+        <input
+          className="bg-background border border-border-color rounded px-3 py-2 w-full text-title"
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="Email (optional)"
+        />
+        {emailError && <p className="text-danger text-sm mt-1">{emailError}</p>}
+      </div>
 
-      <textarea
-        className="bg-background border border-border-color rounded px-3 py-2 w-full h-20 mb-4 resize-none text-title"
-        value={appointmentNote}
-        onChange={e => setAppointmentNote(e.target.value)}
-        placeholder={appointmentNotePlaceholder}
-      />
+      <div className="mb-3">
+        <textarea
+          className="bg-background border border-border-color rounded px-3 py-2 w-full h-20 resize-none text-title"
+          value={appointmentNote}
+          onChange={e => handleAppointmentNoteChange(e.target.value)}
+          placeholder={appointmentNotePlaceholder}
+        />
+        {appointmentNoteError && <p className="text-danger text-sm mt-1">{appointmentNoteError}</p>}
+      </div>
 
       <button
         onClick={handleBook}
-        disabled={!selectedDate || !selectedTime || !firstName || !phone}
+        disabled={
+          !selectedDate ||
+          !selectedTime ||
+          !firstName ||
+          !phone ||
+          !!firstNameError ||
+          !!phoneError ||
+          !!appointmentNoteError
+        }
         className="bg-brand hover:bg-brand/90 disabled:bg-brand/50 text-title-foreground px-6 py-3 rounded w-full font-medium mb-4">
         {editingId ? "Update" : "Book"}
       </button>
 
-      <BookedAppointments appointments={appointments} onEdit={handleEdit} onDelete={handleDelete} />
+      <BookedAppointments
+        editingId={editingId}
+        appointments={appointments}
+        onEdit={handleEdit}
+        handleBook={handleBook}
+        onDelete={handleDelete}
+      />
     </div>
   )
 }
