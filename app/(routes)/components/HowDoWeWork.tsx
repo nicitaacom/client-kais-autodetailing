@@ -20,10 +20,10 @@ function Tab({
   return (
     <button
       onClick={() => onClick(buttonText)}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm uppercase transition-all duration-200 border ${
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm uppercase transition-all duration-300 border backdrop-blur-sm ${
         isSelected
-          ? "bg-red-600 text-white border-red-600 shadow-lg"
-          : "bg-foreground-accent text-subTitle border-red-900/20 hover:border-red-600/50 hover:text-title"
+          ? "bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/30"
+          : "bg-black/30 text-white/70 border-white/10 hover:border-red-500/50 hover:text-white hover:bg-red-900/20"
       }`}>
       {buttonText}
       <Image
@@ -44,10 +44,10 @@ export function HowDoWeWork() {
   const selectedTabContent = consts.howWeWorkTabs.find(tab => tab.text === selectedTab)
 
   return (
-    <div className="bg-foreground rounded-xl border border-red-900/20 p-6">
+    <div className="bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:border-red-500/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-1 h-8 bg-red-600 rounded-full" />
-        <h3 className="text-2xl text-title">
+        <div className="w-1 h-8 bg-red-500 rounded-full shadow-lg shadow-red-500/50" />
+        <h3 className="text-2xl text-white drop-shadow-sm">
           How do we <span className="font-bold">work?</span>
         </h3>
       </div>
@@ -66,19 +66,19 @@ export function HowDoWeWork() {
         <div className="grid gap-4 laptop:grid-cols-2 desktop:grid-cols-3">
           {selectedTabContent.steps.map((step, index) => (
             <div
-              className="bg-foreground-accent hover:bg-red-900/10 rounded-xl border border-red-900/20 p-4 transition-all duration-200 hover:border-red-600/30"
+              className="bg-black/30 backdrop-blur-sm hover:bg-red-900/30 rounded-xl border border-white/10 hover:border-red-500/30 p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-red-500/10"
               key={`step-${index}`}>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-red-600/20 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-red-500/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-white/10">
                   {step.iconSrc && step.iconSrc !== "/" ? (
                     <Image className="w-5 h-5" src={step.iconSrc} alt={step.title} width={20} height={20} />
                   ) : (
-                    <span className="text-red-600 font-bold text-sm">{index + 1}</span>
+                    <span className="text-red-400 font-bold text-sm">{index + 1}</span>
                   )}
                 </div>
-                <h5 className="font-bold text-title">{step.title}</h5>
+                <h5 className="font-bold text-white drop-shadow-sm">{step.title}</h5>
               </div>
-              <p className="text-sm text-subTitle leading-relaxed">{step.description}</p>
+              <p className="text-sm text-white/70 leading-relaxed">{step.description}</p>
             </div>
           ))}
         </div>

@@ -19,24 +19,24 @@ function GoogleReview({ className, usrAvatarUrl, username, date, amountOfStarts,
   const displayedText = isTruncated ? reviewMessage.substring(0, maxChars) + "..." : reviewMessage
 
   return (
-    <li className="min-w-[300px] flex flex-col bg-foreground-accent hover:bg-red-900/10 rounded-xl border border-red-900/20 p-4 transition-all duration-200 hover:border-red-600/30">
+    <li className="min-w-[300px] flex flex-col bg-black/30 backdrop-blur-sm hover:bg-red-900/30 rounded-xl border border-white/10 hover:border-red-500/30 p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-red-500/10">
       {/* HEADER */}
       <div className="flex flex-col gap-3 mb-3">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
             <Image
-              className="w-10 h-10 rounded-full border-2 border-red-900/20"
+              className="w-10 h-10 rounded-full border-2 border-white/20"
               src={usrAvatarUrl}
               alt="user avatar"
               width={40}
               height={40}
             />
             <div>
-              <h5 className="text-title font-semibold text-sm">{username}</h5>
-              <p className="text-subTitle text-xs">{timeAgo(date)}</p>
+              <h5 className="text-white font-semibold text-sm drop-shadow-sm">{username}</h5>
+              <p className="text-white/70 text-xs">{timeAgo(date)}</p>
             </div>
           </div>
-          <div className="bg-red-600/10 p-1 rounded">
+          <div className="bg-red-500/20 backdrop-blur-sm p-1 rounded border border-white/10">
             <Image src="/google.svg" alt="google" width={16} height={16} />
           </div>
         </div>
@@ -50,10 +50,12 @@ function GoogleReview({ className, usrAvatarUrl, username, date, amountOfStarts,
         </div>
       </div>
 
-      <p className="text-title text-sm leading-relaxed">
+      <p className="text-white/90 text-sm leading-relaxed drop-shadow-sm">
         {displayedText}
         {isTruncated && (
-          <Link className="text-red-400 hover:text-red-300 inline ml-1 font-medium" href={businessInfo.mapUrl}>
+          <Link
+            className="text-red-400 hover:text-red-300 inline ml-1 font-medium transition-colors"
+            href={businessInfo.mapUrl}>
             more
           </Link>
         )}
@@ -64,13 +66,13 @@ function GoogleReview({ className, usrAvatarUrl, username, date, amountOfStarts,
 
 export function Reviews() {
   return (
-    <section className="bg-foreground rounded-xl border border-red-900/20 p-6">
+    <section className="bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:border-red-500/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-1 h-8 bg-red-600 rounded-full" />
-        <h1 className="text-2xl font-bold text-center">What our clients write about us</h1>
+        <div className="w-1 h-8 bg-red-500 rounded-full shadow-lg shadow-red-500/50" />
+        <h1 className="text-2xl font-bold text-white drop-shadow-sm">What our clients write about us</h1>
       </div>
 
-      <ul className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-red-600/20 scrollbar-track-transparent">
+      <ul className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-red-500/30 scrollbar-track-transparent">
         {consts.reviews.map((review, index) => (
           <GoogleReview
             key={index}

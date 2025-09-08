@@ -212,35 +212,38 @@ export default function CalendarContainer({
   maxDate.setDate(maxDate.getDate() + maxBookingDaysInAdvance)
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-foreground p-6 rounded-lg">
+    <div className="w-full max-w-4xl mx-auto bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:border-red-500/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300">
       {error && (
         <motion.div
-          className="bg-danger/10 border border-danger/30 rounded p-3 flex items-center gap-3 mb-4"
+          className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-center gap-3 mb-4 backdrop-blur-sm"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.18 }}>
-          <FiAlertCircle className="text-danger flex-shrink-0" />
-          <p className="text-danger flex-1">{error}</p>
-          <button className="p-1 hover:bg-danger/20 rounded" onClick={() => setError("")}>
-            <FiX className="text-danger" />
+          <FiAlertCircle className="text-red-400 flex-shrink-0" />
+          <p className="text-red-300 flex-1">{error}</p>
+          <button className="p-1 hover:bg-red-500/20 rounded transition-colors" onClick={() => setError("")}>
+            <FiX className="text-red-400" />
           </button>
         </motion.div>
       )}
 
       <style>{`
         .react-calendar {
-          background: hsl(var(--background)) !important;
-          color: hsl(var(--title)) !important;
-          border: 1px solid hsl(var(--border-color) / 0.3) !important;
-          border-radius: 8px !important;
+          background: rgba(0, 0, 0, 0.3) !important;
+          backdrop-filter: blur(8px) !important;
+          color: white !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-radius: 12px !important;
           padding: 16px !important;
           width: 100% !important;
         }
         .react-calendar__navigation {
           margin-bottom: 16px;
-          background: hsl(var(--foreground-accent)) !important;
-          border-radius: 6px;
+          background: rgba(0, 0, 0, 0.4) !important;
+          backdrop-filter: blur(4px) !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-radius: 8px;
           padding: 8px;
         }
         .react-calendar__navigation button {
@@ -248,21 +251,22 @@ export default function CalendarContainer({
           height: 32px;
           border: none;
           background: transparent !important;
-          color: hsl(var(--brand)) !important;
-          border-radius: 4px;
+          color: #ef4444 !important;
+          border-radius: 6px;
           cursor: pointer;
+          transition: all 0.2s;
         }
         .react-calendar__navigation button:hover {
-          background: hsl(var(--brand) / 0.1) !important;
+          background: rgba(239, 68, 68, 0.2) !important;
         }
         .react-calendar__navigation__label {
           font-weight: 600;
-          color: hsl(var(--title));
+          color: white;
           pointer-events: none !important;
         }
         .react-calendar__month-view__weekdays {
           font-size: 12px;
-          color: hsl(var(--subTitle));
+          color: rgba(255, 255, 255, 0.7);
           margin-bottom: 8px;
         }
         .react-calendar__month-view__days {
@@ -271,31 +275,37 @@ export default function CalendarContainer({
           gap: 2px !important;
         }
         .react-calendar__tile {
-          background: hsl(var(--background)) !important;
-          color: hsl(var(--title));
-          border: 1px solid hsl(var(--border-color) / 0.2) !important;
-          border-radius: 4px !important;
+          background: rgba(0, 0, 0, 0.3) !important;
+          backdrop-filter: blur(4px) !important;
+          color: white;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-radius: 6px !important;
           aspect-ratio: 1;
           font-size: 14px;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
+          transition: all 0.2s;
         }
         .react-calendar__tile:hover {
-          background: hsl(var(--brand) / 0.1) !important;
+          background: rgba(239, 68, 68, 0.2) !important;
+          border-color: rgba(239, 68, 68, 0.3) !important;
         }
         .react-calendar__tile--active {
-          background: hsl(var(--brand)) !important;
-          color: hsl(var(--title-foreground)) !important;
+          background: #ef4444 !important;
+          color: white !important;
+          border-color: #ef4444 !important;
+          box-shadow: 0 0 20px rgba(239, 68, 68, 0.3) !important;
         }
         .react-calendar__tile--active:hover {
-          background: hsl(var(--brand)) !important;
-          color: hsl(var(--title-foreground)) !important;
+          background: #ef4444 !important;
+          color: white !important;
         }
         .react-calendar__tile:disabled {
-          background: hsl(var(--foreground) / 0.5) !important;
-          color: hsl(var(--subTitle) / 0.4) !important;
+          background: rgba(0, 0, 0, 0.2) !important;
+          color: rgba(255, 255, 255, 0.3) !important;
           pointer-events: none;
+          border-color: rgba(255, 255, 255, 0.05) !important;
         }
       `}</style>
 
@@ -324,19 +334,19 @@ export default function CalendarContainer({
         />
 
         <div className="flex flex-col">
-          <p className="text-subTitle mb-3">{selectedDate ? "Available times" : "Select a date"}</p>
+          <p className="text-white/70 mb-3 drop-shadow-sm">{selectedDate ? "Available times" : "Select a date"}</p>
           <div className="flex-1 min-h-[320px]">
             {selectedDate ? (
               filteredTimes.length ? (
-                <div className="grid grid-cols-3 gap-2 h-full overflow-y-auto pr-2 content-start">
+                <div className="grid grid-cols-3 gap-2 h-full overflow-y-auto pr-2 content-start scrollbar-thin scrollbar-thumb-red-500/30 scrollbar-track-transparent">
                   {filteredTimes.map(time => (
                     <button
                       key={time.format()}
                       onClick={() => setSelectedTime(time.format("HH:mm"))}
-                      className={`px-3 py-2 text-sm rounded transition-colors h-fit ${
+                      className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 h-fit backdrop-blur-sm ${
                         selectedTime === time.format("HH:mm")
-                          ? "bg-brand text-title-foreground"
-                          : "bg-background text-title border border-border-color hover:bg-brand/10"
+                          ? "bg-red-500 text-white border border-red-500 shadow-lg shadow-red-500/30"
+                          : "bg-black/30 text-white border border-white/10 hover:bg-red-500/20 hover:border-red-500/30"
                       }`}>
                       {time.format("h:mm A")}
                     </button>
@@ -344,12 +354,12 @@ export default function CalendarContainer({
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-subTitle">No available times</p>
+                  <p className="text-white/70">No available times</p>
                 </div>
               )
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className="text-subTitle">Select a date to view available times</p>
+                <p className="text-white/70">Select a date to view available times</p>
               </div>
             )}
           </div>
@@ -359,45 +369,45 @@ export default function CalendarContainer({
       <div className="grid tablet:grid-cols-2 gap-3 mb-4">
         <div>
           <input
-            className="bg-background border border-border-color rounded px-3 py-2 text-title w-full"
+            className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-red-500/30 focus:border-red-500/50 rounded-lg px-3 py-2 text-white w-full transition-all duration-200 placeholder:text-white/50"
             type="text"
             value={firstName}
             onChange={e => handleFirstNameChange(e.target.value)}
             placeholder="First name"
           />
-          {firstNameError && <p className="text-danger text-sm mt-1">{firstNameError}</p>}
+          {firstNameError && <p className="text-red-400 text-sm mt-1">{firstNameError}</p>}
         </div>
         <div>
           <input
-            className="bg-background border border-border-color rounded px-3 py-2 text-title w-full"
+            className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-red-500/30 focus:border-red-500/50 rounded-lg px-3 py-2 text-white w-full transition-all duration-200 placeholder:text-white/50"
             type="tel"
             value={phone}
             onChange={e => handlePhoneChange(e.target.value)}
             placeholder={phonePlaceholder}
           />
-          {phoneError && <p className="text-danger text-sm mt-1">{phoneError}</p>}
+          {phoneError && <p className="text-red-400 text-sm mt-1">{phoneError}</p>}
         </div>
       </div>
 
       <div className="mb-3">
         <input
-          className="bg-background border border-border-color rounded px-3 py-2 w-full text-title"
+          className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-red-500/30 focus:border-red-500/50 rounded-lg px-3 py-2 w-full text-white transition-all duration-200 placeholder:text-white/50"
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           placeholder="Email (optional)"
         />
-        {emailError && <p className="text-danger text-sm mt-1">{emailError}</p>}
+        {emailError && <p className="text-red-400 text-sm mt-1">{emailError}</p>}
       </div>
 
       <div className="mb-3">
         <textarea
-          className="bg-background border border-border-color rounded px-3 py-2 w-full h-20 resize-none text-title"
+          className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-red-500/30 focus:border-red-500/50 rounded-lg px-3 py-2 w-full h-20 resize-none text-white transition-all duration-200 placeholder:text-white/50"
           value={appointmentNote}
           onChange={e => handleAppointmentNoteChange(e.target.value)}
           placeholder={appointmentNotePlaceholder}
         />
-        {appointmentNoteError && <p className="text-danger text-sm mt-1">{appointmentNoteError}</p>}
+        {appointmentNoteError && <p className="text-red-400 text-sm mt-1">{appointmentNoteError}</p>}
       </div>
 
       <button
@@ -411,7 +421,7 @@ export default function CalendarContainer({
           !!phoneError ||
           !!appointmentNoteError
         }
-        className="bg-brand hover:bg-brand/90 disabled:bg-brand/50 text-title-foreground px-6 py-3 rounded w-full font-medium mb-4">
+        className="bg-red-500 hover:bg-red-600 disabled:bg-red-500/30 text-white px-6 py-3 rounded-lg w-full font-medium mb-4 transition-all duration-200 backdrop-blur-sm shadow-lg disabled:shadow-none hover:shadow-red-500/20">
         {editingId ? "Update" : "Book"}
       </button>
 

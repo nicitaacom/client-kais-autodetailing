@@ -132,10 +132,10 @@ export function AICarService() {
       <motion.div className="flex flex-col gap-2" variants={itemVariants}>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <FaCar className="text-brand text-2xl" />
+            <FaCar className="text-red-400 text-2xl drop-shadow-sm" />
             <div>
-              <h2 className="text-2xl tablet:text-3xl font-bold text-title">AI Car Detailing Service</h2>
-              <p className="text-subTitle text-sm tablet:text-base">
+              <h2 className="text-2xl tablet:text-3xl font-bold text-white drop-shadow-md">AI Car Detailing Service</h2>
+              <p className="text-white/80 text-sm tablet:text-base drop-shadow-sm">
                 AI suggests, you choose - preview before & after.
               </p>
             </div>
@@ -151,10 +151,12 @@ export function AICarService() {
                   aria-current={active}
                   onClick={() => goToStep(s.id)}
                   whileTap={{ scale: 0.94 }}
-                  className={`rounded-full w-8 h-8 flex items-center justify-center transition-colors focus:outline-none border border-brand/40 ${
-                    active ? "bg-brand text-title-foreground" : "bg-background/20 text-subTitle hover:bg-brand/10"
+                  className={`rounded-full w-8 h-8 flex items-center justify-center transition-all duration-300 focus:outline-none ${
+                    active
+                      ? "bg-red-600/80 text-white border border-red-400/50 shadow-lg shadow-red-500/20"
+                      : "bg-black/30 backdrop-blur-sm text-white/80 hover:bg-red-900/30 border border-white/10 hover:border-red-500/30"
                   }`}>
-                  <span className="text-sm font-semibold">{s.id}</span>
+                  <span className="text-sm font-semibold drop-shadow-sm">{s.id}</span>
                 </motion.button>
               )
             })}
@@ -170,10 +172,12 @@ export function AICarService() {
                 type="button"
                 onClick={() => goToStep(s.id)}
                 whileTap={{ scale: 0.94 }}
-                className={`flex-1 rounded-full py-1.5 text-xs font-medium transition-colors border border-brand/40 ${
-                  active ? "bg-brand text-title-foreground" : "bg-background/20 text-subTitle"
+                className={`flex-1 rounded-full py-1.5 text-xs font-medium transition-all duration-300 ${
+                  active
+                    ? "bg-red-600/80 text-white border border-red-400/50"
+                    : "bg-black/30 backdrop-blur-sm text-white/80 border border-white/10"
                 }`}>
-                {s.label}
+                <span className="drop-shadow-sm">{s.label}</span>
               </motion.button>
             )
           })}
@@ -184,17 +188,17 @@ export function AICarService() {
       <AnimatePresence>
         {error && (
           <motion.div
-            className="bg-danger/6 border border-danger/20 rounded-md p-2 flex items-start gap-2"
+            className="bg-red-900/20 backdrop-blur-sm border border-red-500/30 rounded-xl p-3 flex items-start gap-2 shadow-lg shadow-red-500/10"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.18 }}>
-            <FiAlertCircle className="text-danger mt-0.5 flex-shrink-0" />
+            <FiAlertCircle className="text-red-400 mt-0.5 flex-shrink-0 drop-shadow-sm" />
             <div className="flex-1">
-              <p className="text-danger text-sm">{error}</p>
+              <p className="text-red-200 text-sm drop-shadow-sm">{error}</p>
             </div>
-            <button type="button" className="p-0.5 rounded hover:bg-danger/10" onClick={clearError}>
-              <FiX className="text-danger" />
+            <button type="button" className="p-0.5 rounded hover:bg-red-900/30 transition-colors" onClick={clearError}>
+              <FiX className="text-red-400 drop-shadow-sm" />
             </button>
           </motion.div>
         )}
@@ -205,20 +209,20 @@ export function AICarService() {
         {step === 1 && (
           <motion.div
             key="step1"
-            className="bg-foreground rounded-md p-4 border border-border-color"
+            className="bg-black/30 backdrop-blur-md rounded-2xl border border-white/20 hover:border-red-500/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300"
             variants={stepVariants}
             custom={direction}
             initial="hidden"
             animate="visible"
             exit="exit">
-            <div className="flex items-center gap-2 mb-2">
-              <FaCar className="text-brand text-lg" />
-              <h3 className="text-lg tablet:text-xl font-semibold text-title">Step 1: Your Vehicle</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <FaCar className="text-red-400 text-lg drop-shadow-sm" />
+              <h3 className="text-lg tablet:text-xl font-semibold text-white drop-shadow-md">Step 1: Your Vehicle</h3>
             </div>
             <div>
-              <label className="block text-subTitle mb-1 text-sm">Car Model *</label>
+              <label className="block text-white/80 mb-2 text-sm font-medium drop-shadow-sm">Car Model *</label>
               <motion.input
-                className="w-full bg-background border border-border-color rounded-md px-3 py-2 text-title focus:border-brand focus:outline-none transition-colors"
+                className="w-full bg-black/20 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-red-500/50 focus:outline-none transition-all duration-300 focus:shadow-lg focus:shadow-red-500/10"
                 placeholder="e.g., Tesla Model 3, BMW X5"
                 value={carModel}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCarModel(event.target.value)}
@@ -227,12 +231,14 @@ export function AICarService() {
                 transition={{ duration: 0.14 }}
               />
             </div>
-            <div className="mt-3">
-              <label className="block text-subTitle mb-1 text-sm">What do you want? *</label>
+            <div className="mt-4">
+              <label className="block text-white/80 mb-2 text-sm font-medium drop-shadow-sm">What do you want? *</label>
               <motion.textarea
                 ref={userNeedsReference}
-                className={`w-full bg-background border border-border-color rounded-md px-3 py-2 text-title focus:border-brand focus:outline-none h-20 resize-none transition-colors ${
-                  highlightNeeds ? "border-brand shadow-brand/50" : ""
+                className={`w-full bg-black/20 backdrop-blur-sm border rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none h-24 resize-none transition-all duration-300 ${
+                  highlightNeeds
+                    ? "border-red-500/50 shadow-lg shadow-red-500/20"
+                    : "border-white/20 focus:border-red-500/50 focus:shadow-lg focus:shadow-red-500/10"
                 }`}
                 placeholder="Describe - paint correction, ceramic coating, interior deep clean, etc."
                 value={userNeeds}
@@ -243,35 +249,37 @@ export function AICarService() {
               />
             </div>
             <motion.button
-              className={`mt-3 bg-brand hover:bg-brand/90 text-title-foreground px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-1.5 ${loading ? "opacity-50 cursor-default pointer-events-none" : ""}`}
+              className={`mt-4 bg-red-600/80 hover:bg-red-700/80 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-red-500/20 hover:scale-[1.02] backdrop-blur-sm border border-red-500/30 ${loading ? "opacity-50 cursor-default pointer-events-none" : ""}`}
               onClick={getAIRecommendation}
               disabled={loading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.96 }}>
               {loading ? (
-                <AiOutlineLoading3Quarters className="animate-spin text-title-foreground" />
+                <AiOutlineLoading3Quarters className="animate-spin text-white drop-shadow-sm" />
               ) : (
-                <FiMessageSquare className="text-title-foreground" />
+                <FiMessageSquare className="text-white drop-shadow-sm" />
               )}
-              <span className="text-black">Get AI Recommendation</span>
+              <span className="drop-shadow-sm">Get AI Recommendation</span>
             </motion.button>
           </motion.div>
         )}
         {step === 2 && (
           <motion.div
             key="step2"
-            className="bg-foreground rounded-md p-4 border border-border-color"
+            className="bg-black/30 backdrop-blur-md rounded-2xl border border-white/20 hover:border-red-500/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300"
             variants={stepVariants}
             custom={direction}
             initial="hidden"
             animate="visible"
             exit="exit">
-            <div className="flex items-center gap-2 mb-2">
-              <FiMessageSquare className="text-brand text-lg" />
-              <h3 className="text-lg tablet:text-xl font-semibold text-title">Step 2: AI Recommendation</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <FiMessageSquare className="text-red-400 text-lg drop-shadow-sm" />
+              <h3 className="text-lg tablet:text-xl font-semibold text-white drop-shadow-md">
+                Step 2: AI Recommendation
+              </h3>
             </div>
             <motion.div
-              className="bg-background rounded-md p-3 border border-border-color text-base tablet:text-lg leading-relaxed"
+              className="bg-black/20 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-base tablet:text-lg leading-relaxed text-white/90"
               variants={imageVariants}
               initial="hidden"
               animate="visible"
@@ -280,12 +288,16 @@ export function AICarService() {
               }}
             />
             {allowEditNeeds && (
-              <div className="mt-3">
-                <label className="block text-subTitle mb-1 text-sm">Update your needs *</label>
+              <div className="mt-4">
+                <label className="block text-white/80 mb-2 text-sm font-medium drop-shadow-sm">
+                  Update your needs *
+                </label>
                 <motion.textarea
                   ref={userNeedsReference}
-                  className={`w-full bg-background border border-border-color rounded-md px-3 py-2 text-title focus:border-brand focus:outline-none h-20 resize-none transition-colors ${
-                    highlightNeeds ? "border-brand shadow-brand/50" : ""
+                  className={`w-full bg-black/20 backdrop-blur-sm border rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none h-24 resize-none transition-all duration-300 ${
+                    highlightNeeds
+                      ? "border-red-500/50 shadow-lg shadow-red-500/20"
+                      : "border-white/20 focus:border-red-500/50 focus:shadow-lg focus:shadow-red-500/10"
                   }`}
                   placeholder="Describe - paint correction, ceramic coating, interior deep clean, etc."
                   value={userNeeds}
@@ -296,52 +308,53 @@ export function AICarService() {
                 />
               </div>
             )}
-            <div className="flex flex-col mobile:flex-row gap-2 mt-3">
+            <div className="flex flex-col mobile:flex-row gap-3 mt-4">
               {allowEditNeeds ? (
                 <motion.button
-                  className={`bg-brand hover:bg-brand/90 text-title-foreground px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-1.5
-                     ${loading ? "opacity-50 cursor-default pointer-events-none" : ""}`}
+                  className={`bg-red-600/80 hover:bg-red-700/80 text-white px-3 py-1.5
+                     rounded-xl font-semibold transition-all duration-300 flex items-center gap-2
+                      shadow-lg hover:shadow-red-500/20 hover:scale-[1.02] backdrop-blur-sm border border-red-500/30
+                   ${loading ? "opacity-50 cursor-default pointer-events-none" : ""}`}
                   onClick={getAIRecommendation}
                   disabled={loading}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.96 }}>
                   {loading ? (
-                    <AiOutlineLoading3Quarters className="animate-spin text-title-foreground" />
+                    <AiOutlineLoading3Quarters className="animate-spin text-white drop-shadow-sm" />
                   ) : (
-                    <FiMessageSquare className="text-title-foreground" />
+                    <FiMessageSquare className="text-white drop-shadow-sm" />
                   )}
-                  <span className="text-black">Update Recommendation</span>
+                  <span className="drop-shadow-sm">Update Recommendation</span>
                 </motion.button>
               ) : null}
               <motion.button
-                className={`bg-brand hover:bg-brand/90 text-title-foreground px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-1.5
-                   ${loading ? "opacity-50 cursor-default pointer-events-none" : ""}`}
+                className={`bg-red-600/80 hover:bg-red-700/80 text-white px-3 py-1.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-red-500/20 hover:scale-[1.02] backdrop-blur-sm border border-red-500/30
+                 ${loading ? "opacity-50 cursor-default pointer-events-none" : ""}`}
                 onClick={generateImages}
                 disabled={loading}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}>
                 {loading ? (
-                  <AiOutlineLoading3Quarters className="animate-spin text-title-foreground" />
+                  <AiOutlineLoading3Quarters className="animate-spin text-white drop-shadow-sm" />
                 ) : (
-                  <FiImage className="text-title-foreground" />
+                  <FiImage className="text-white drop-shadow-sm" />
                 )}
-                <span className="text-black">Generate Preview Images</span>
+                <span className="drop-shadow-sm">Generate Preview Images</span>
               </motion.button>
               <motion.button
-                className="bg-brand hover:bg-brand/90 text-title-foreground flex items-center gap-1.5 px-4 py-2 rounded-md font-medium transition-colors"
+                className="bg-red-600/80 hover:bg-red-700/80 text-white flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-red-500/20 hover:scale-[1.02] backdrop-blur-sm border border-red-500/30"
                 onClick={bookService}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}>
-                <FaRegCalendarAlt />
-                Book Appointment
+                <FaRegCalendarAlt className="drop-shadow-sm" />
+                <span className="drop-shadow-sm">Book Appointment</span>
               </motion.button>
               <motion.button
-                className="bg-foreground-accent hover:bg-foreground-accent/80 text-title px-4 py-2 rounded-md font-medium transition-colors border
-                 border-border-color"
+                className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-white px-3 py-1.5 rounded-xl font-semibold transition-all duration-300 border border-white/20 hover:border-red-500/30 hover:scale-[1.02]"
                 onClick={() => goToStep(1)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}>
-                Modify Request
+                <span className="drop-shadow-sm">Modify Request</span>
               </motion.button>
             </div>
           </motion.div>
@@ -349,20 +362,22 @@ export function AICarService() {
         {step === 3 && (
           <motion.div
             key="step3"
-            className="bg-foreground rounded-md p-4 border border-border-color"
+            className="bg-black/30 backdrop-blur-md rounded-2xl border border-white/20 hover:border-red-500/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300"
             variants={stepVariants}
             custom={direction}
             initial="hidden"
             animate="visible"
             exit="exit">
-            <div className="flex items-center gap-2 mb-3">
-              <FiImage className="text-brand text-lg" />
-              <h3 className="text-lg tablet:text-xl font-semibold text-title">Step 3: Service Preview</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <FiImage className="text-red-400 text-lg drop-shadow-sm" />
+              <h3 className="text-lg tablet:text-xl font-semibold text-white drop-shadow-md">
+                Step 3: Service Preview
+              </h3>
             </div>
             <motion.div variants={itemVariants}>
-              <h4 className="text-base tablet:text-lg font-medium text-title mb-1">Before / After</h4>
+              <h4 className="text-base tablet:text-lg font-medium text-white mb-2 drop-shadow-sm">Before / After</h4>
               <motion.div
-                className="bg-background rounded-md overflow-hidden border border-border-color h-48 tablet:h-64 laptop:h-72"
+                className="bg-black/20 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10 h-48 tablet:h-64 laptop:h-72 shadow-lg"
                 variants={imageVariants}
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.26 }}>
@@ -372,24 +387,26 @@ export function AICarService() {
                     itemTwo={<ReactCompareSliderImage src={afterImage} alt="After detailing service" />}
                   />
                 ) : (
-                  <div className="text-subTitle flex items-center justify-center h-full">No preview available</div>
+                  <div className="text-white/60 flex items-center justify-center h-full drop-shadow-sm">
+                    No preview available
+                  </div>
                 )}
               </motion.div>
             </motion.div>
-            <div className="flex flex-col mobile:flex-row gap-2 mt-3">
+            <div className="flex flex-col mobile:flex-row gap-3 mt-4">
               <motion.button
-                className="bg-brand hover:bg-brand/90 text-title-foreground px-4 py-2 rounded-md font-medium transition-colors"
+                className="bg-red-600/80 hover:bg-red-700/80 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-red-500/20 hover:scale-[1.02] backdrop-blur-sm border border-red-500/30"
                 onClick={bookService}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}>
-                Book This Service
+                <span className="drop-shadow-sm">Book This Service</span>
               </motion.button>
               <motion.button
-                className="bg-foreground-accent hover:bg-foreground-accent/80 text-title px-4 py-2 rounded-md font-medium transition-colors border border-border-color"
+                className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 border border-white/20 hover:border-red-500/30 hover:scale-[1.02]"
                 onClick={resetState}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}>
-                Start Over
+                <span className="drop-shadow-sm">Start Over</span>
               </motion.button>
             </div>
           </motion.div>
@@ -397,15 +414,17 @@ export function AICarService() {
         {step === 4 && (
           <motion.div
             key="step4"
-            className="bg-foreground rounded-md p-4 border border-border-color"
+            className="bg-black/30 backdrop-blur-md rounded-2xl border border-white/20 hover:border-red-500/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300"
             variants={stepVariants}
             custom={direction}
             initial="hidden"
             animate="visible"
             exit="exit">
-            <div className="flex items-center gap-2 mb-3">
-              <FiCalendar className="text-brand text-lg" />
-              <h3 className="text-lg tablet:text-xl font-semibold text-title">Step 4: Schedule Appointment</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <FiCalendar className="text-red-400 text-lg drop-shadow-sm" />
+              <h3 className="text-lg tablet:text-xl font-semibold text-white drop-shadow-md">
+                Step 4: Schedule Appointment
+              </h3>
             </div>
             <CalendarContainer
               businessHours={businessInfo.businessHours}
