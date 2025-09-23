@@ -22,7 +22,7 @@ export function Footer() {
             <div className="text-sm text-subTitle space-y-1">
               <p>Mo-Fr: 09:00 - 17:00</p>
               <p>Sat-Sun: 09:00 - 15:00</p>
-              <p className="text-red-400">Need 24/7? - call +44 752 599 69 49</p>
+              <p className="text-brand-400">Need 24/7? - call {businessInfo.phone}</p>
             </div>
           </div>
         </div>
