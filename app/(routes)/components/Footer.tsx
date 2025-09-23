@@ -17,13 +17,14 @@ export function Footer() {
           </div>
 
           {/* SERVICES HOURS */}
-          <div className="flex flex-col items-center laptop:items-start">
-            <h6 className="font-bold text-red-400 mb-2">Services:</h6>
-            <div className="text-sm text-subTitle space-y-1">
-              <p>Mo-Fr: 09:00 - 17:00</p>
-              <p>Sat-Sun: 09:00 - 15:00</p>
-              <p className="text-brand-400">Need 24/7? - call {businessInfo.phone}</p>
-            </div>
+          <div className="text-sm text-subTitle space-y-1">
+            <p>
+              Mo-Fr: {businessInfo.businessHours.monday.opens} - {businessInfo.businessHours.friday.closes}
+            </p>
+            <p>
+              Sat-Sun: {businessInfo.businessHours.saturday.opens} - {businessInfo.businessHours.sunday.closes}
+            </p>
+            <p className="text-brand-400">Need 24/7? - call {businessInfo.phone}</p>
           </div>
         </div>
 
