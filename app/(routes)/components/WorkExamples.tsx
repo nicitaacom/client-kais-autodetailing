@@ -11,7 +11,7 @@ export function WorkExamples() {
   const animationRef = useRef<number>(null)
 
   // 1. Generate work image paths
-  const workImages = Array.from({ length: 39 }, (_, i) => `/work/work-${i + 1}.jpg`)
+  const workImages = Array.from({ length: 35 }, (_, i) => `/work/work-${i + 1}.jpg`)
 
   // 2. Handle navigation with smooth animation
   const goToPrevious = () => {
