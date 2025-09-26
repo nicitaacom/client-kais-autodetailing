@@ -28,8 +28,8 @@ export default function BookedAppointments({
               key={appt.id}
               className={`bg-black/30 backdrop-blur-sm p-4 rounded-xl border transition-all duration-300 flex justify-between items-center hover:scale-[1.01] ${
                 editingId === appt.id
-                  ? "bg-red-500/20 border-red-500/50 shadow-lg shadow-red-500/20"
-                  : "border-white/10 hover:border-red-500/30 hover:bg-red-900/20"
+                  ? "bg-brand/20 border-brand/50 shadow-lg shadow-brand/20"
+                  : "border-white/10 hover:border-brand/30 hover:bg-brand/20"
               }`}>
               <div className="flex-1">
                 <span className="text-white font-medium drop-shadow-sm">
@@ -53,7 +53,7 @@ export default function BookedAppointments({
                 )}
                 <button
                   onClick={() => onDelete(appt.id)}
-                  className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-all duration-200 backdrop-blur-sm">
+                  className="p-2 text-brand hover:text-brand hover:bg-brand/20 rounded-lg transition-all duration-200 backdrop-blur-sm">
                   <MdDelete size={20} />
                 </button>
               </div>

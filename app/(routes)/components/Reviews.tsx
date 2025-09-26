@@ -19,7 +19,7 @@ function GoogleReview({ className, usrAvatarUrl, username, date, amountOfStarts,
   const displayedText = isTruncated ? reviewMessage.substring(0, maxChars) + "..." : reviewMessage
 
   return (
-    <li className="min-w-[300px] flex flex-col bg-black/30 backdrop-blur-sm hover:bg-red-900/30 rounded-xl border border-white/10 hover:border-red-500/30 p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-red-500/10">
+    <li className="min-w-[300px] flex flex-col bg-black/30 backdrop-blur-sm hover:bg-brand/30 rounded-xl border border-white/10 hover:border-brand/30 p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-brand/10">
       {/* HEADER */}
       <div className="flex flex-col gap-3 mb-3">
         <div className="flex justify-between items-start">
@@ -36,7 +36,7 @@ function GoogleReview({ className, usrAvatarUrl, username, date, amountOfStarts,
               <p className="text-white/70 text-xs">{timeAgo(date)}</p>
             </div>
           </div>
-          <div className="bg-red-500/20 backdrop-blur-sm p-1 rounded border border-white/10">
+          <div className="bg-brand/20 backdrop-blur-sm p-1 rounded border border-white/10">
             <Image src="/google.svg" alt="google" width={16} height={16} />
           </div>
         </div>
@@ -54,7 +54,7 @@ function GoogleReview({ className, usrAvatarUrl, username, date, amountOfStarts,
         {displayedText}
         {isTruncated && (
           <Link
-            className="text-red-400 hover:text-red-300 inline ml-1 font-medium transition-colors"
+            className="text-brand hover:text-brand inline ml-1 font-medium transition-colors"
             href={businessInfo.mapUrl}>
             more
           </Link>
@@ -66,9 +66,9 @@ function GoogleReview({ className, usrAvatarUrl, username, date, amountOfStarts,
 
 export function Reviews() {
   return (
-    <section className="bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:border-red-500/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300">
+    <section className="bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:border-brand/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-1 h-8 bg-red-500 rounded-full shadow-lg shadow-red-500/50" />
+        <div className="w-1 h-8 bg-brand rounded-full shadow-lg shadow-brand/50" />
         <h1 className="text-2xl font-bold text-white drop-shadow-sm">What our clients write about us</h1>
       </div>
 

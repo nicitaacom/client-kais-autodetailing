@@ -212,18 +212,18 @@ export default function CalendarContainer({
   maxDate.setDate(maxDate.getDate() + maxBookingDaysInAdvance)
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:border-red-500/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300">
+    <div className="w-full max-w-4xl mx-auto bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:border-brand/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300">
       {error && (
         <motion.div
-          className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-center gap-3 mb-4 backdrop-blur-sm"
+          className="bg-brand/10 border border-brand/30 rounded-xl p-3 flex items-center gap-3 mb-4 backdrop-blur-sm"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.18 }}>
-          <FiAlertCircle className="text-red-400 flex-shrink-0" />
-          <p className="text-red-300 flex-1">{error}</p>
-          <button className="p-1 hover:bg-red-500/20 rounded transition-colors" onClick={() => setError("")}>
-            <FiX className="text-red-400" />
+          <FiAlertCircle className="text-brand flex-shrink-0" />
+          <p className="text-brand flex-1">{error}</p>
+          <button className="p-1 hover:bg-brand/20 rounded transition-colors" onClick={() => setError("")}>
+            <FiX className="text-brand" />
           </button>
         </motion.div>
       )}
@@ -345,8 +345,8 @@ export default function CalendarContainer({
                       onClick={() => setSelectedTime(time.format("HH:mm"))}
                       className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 h-fit backdrop-blur-sm ${
                         selectedTime === time.format("HH:mm")
-                          ? "bg-red-500 text-white border border-red-500 shadow-lg shadow-red-500/30"
-                          : "bg-black/30 text-white border border-white/10 hover:bg-red-500/20 hover:border-red-500/30"
+                          ? "bg-brand text-white border border-brand shadow-lg shadow-brand/30"
+                          : "bg-black/30 text-white border border-white/10 hover:bg-brand/20 hover:border-brand/30"
                       }`}>
                       {time.format("h:mm A")}
                     </button>
@@ -369,45 +369,45 @@ export default function CalendarContainer({
       <div className="grid tablet:grid-cols-2 gap-3 mb-4">
         <div>
           <input
-            className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-red-500/30 focus:border-red-500/50 rounded-lg px-3 py-2 text-white w-full transition-all duration-200 placeholder:text-white/50"
+            className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-brand/30 focus:border-brand/50 rounded-lg px-3 py-2 text-white w-full transition-all duration-200 placeholder:text-white/50"
             type="text"
             value={firstName}
             onChange={e => handleFirstNameChange(e.target.value)}
             placeholder="First name"
           />
-          {firstNameError && <p className="text-red-400 text-sm mt-1">{firstNameError}</p>}
+          {firstNameError && <p className="text-brand text-sm mt-1">{firstNameError}</p>}
         </div>
         <div>
           <input
-            className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-red-500/30 focus:border-red-500/50 rounded-lg px-3 py-2 text-white w-full transition-all duration-200 placeholder:text-white/50"
+            className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-brand/30 focus:border-brand/50 rounded-lg px-3 py-2 text-white w-full transition-all duration-200 placeholder:text-white/50"
             type="tel"
             value={phone}
             onChange={e => handlePhoneChange(e.target.value)}
             placeholder={phonePlaceholder}
           />
-          {phoneError && <p className="text-red-400 text-sm mt-1">{phoneError}</p>}
+          {phoneError && <p className="text-brand text-sm mt-1">{phoneError}</p>}
         </div>
       </div>
 
       <div className="mb-3">
         <input
-          className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-red-500/30 focus:border-red-500/50 rounded-lg px-3 py-2 w-full text-white transition-all duration-200 placeholder:text-white/50"
+          className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-brand/30 focus:border-brand/50 rounded-lg px-3 py-2 w-full text-white transition-all duration-200 placeholder:text-white/50"
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           placeholder="Email (optional)"
         />
-        {emailError && <p className="text-red-400 text-sm mt-1">{emailError}</p>}
+        {emailError && <p className="text-brand text-sm mt-1">{emailError}</p>}
       </div>
 
       <div className="mb-3">
         <textarea
-          className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-red-500/30 focus:border-red-500/50 rounded-lg px-3 py-2 w-full h-20 resize-none text-white transition-all duration-200 placeholder:text-white/50"
+          className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-brand/30 focus:border-brand/50 rounded-lg px-3 py-2 w-full h-20 resize-none text-white transition-all duration-200 placeholder:text-white/50"
           value={appointmentNote}
           onChange={e => handleAppointmentNoteChange(e.target.value)}
           placeholder={appointmentNotePlaceholder}
         />
-        {appointmentNoteError && <p className="text-red-400 text-sm mt-1">{appointmentNoteError}</p>}
+        {appointmentNoteError && <p className="text-brand text-sm mt-1">{appointmentNoteError}</p>}
       </div>
 
       <button
@@ -421,7 +421,7 @@ export default function CalendarContainer({
           !!phoneError ||
           !!appointmentNoteError
         }
-        className="bg-red-500 hover:bg-red-600 disabled:bg-red-500/30 text-white px-6 py-3 rounded-lg w-full font-medium mb-4 transition-all duration-200 backdrop-blur-sm shadow-lg disabled:shadow-none hover:shadow-red-500/20">
+        className="bg-brand hover:bg-brand disabled:bg-brand/30 text-white px-6 py-3 rounded-lg w-full font-medium mb-4 transition-all duration-200 backdrop-blur-sm shadow-lg disabled:shadow-none hover:shadow-brand/20">
         {editingId ? "Update" : "Book"}
       </button>
 

@@ -17,7 +17,7 @@ interface SocialItemProps {
 function SocialItem({ className, iconSrc, altText, text, href }: SocialItemProps) {
   return (
     <Link
-      className={twMerge("flex flex-col items-center gap-1 hover:text-red-400 transition-colors group", className)}
+      className={twMerge("flex flex-col items-center gap-1 hover:text-brand transition-colors group", className)}
       href={href}
       target="_blank">
       <Image
@@ -27,17 +27,17 @@ function SocialItem({ className, iconSrc, altText, text, href }: SocialItemProps
         width={16}
         height={16}
       />
-      <p className="text-xs text-subTitle group-hover:text-red-400">{text}</p>
+      <p className="text-xs text-subTitle group-hover:text-brand">{text}</p>
     </Link>
   )
 }
 
 export function Header() {
   return (
-    <header className="bg-black border-b border-red-900/30 flex flex-col desktop:flex-row justify-around items-center py-3 px-4 mobile:px-6 tablet:px-8 laptop:px-12 desktop:px-16">
+    <header className="bg-black border-b border-brand/30 flex flex-col desktop:flex-row justify-around items-center py-3 px-4 mobile:px-6 tablet:px-8 laptop:px-12 desktop:px-16">
       {/* LOGO */}
       <div className="w-[220px] hidden desktop:flex justify-center items-center gap-x-3">
-        <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+        <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
           <span className="text-white font-bold text-sm">K</span>
         </div>
         <h1 className="text-lg font-bold text-title">{businessInfo.name}</h1>
@@ -47,10 +47,10 @@ export function Header() {
         {/* GOOGLE REVIEWS */}
         <GoogleReviews />
 
-        <div className="flex flex-col gap-y-2 laptop:gap-y-0 gap-x-6 desktop:flex-row border-b border-red-900/30 laptop:border-none pb-2 laptop:pb-0">
+        <div className="flex flex-col gap-y-2 laptop:gap-y-0 gap-x-6 desktop:flex-row border-b border-brand/30 laptop:border-none pb-2 laptop:pb-0">
           {/* EMAIL */}
           <div className="flex justify-center items-center gap-x-2">
-            <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center">
+            <div className="w-5 h-5 bg-brand rounded-full flex items-center justify-center">
               <Image
                 className="w-3 h-3 filter brightness-0 invert"
                 src="/email.svg"
@@ -63,7 +63,7 @@ export function Header() {
           </div>
           {/* PHONE */}
           <div className="flex justify-center items-center gap-x-2">
-            <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center">
+            <div className="w-5 h-5 bg-brand rounded-full flex items-center justify-center">
               <Image
                 className="w-3 h-3 filter brightness-0 invert"
                 src="/phone.svg"
