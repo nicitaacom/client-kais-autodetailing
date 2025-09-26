@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { createClient } from "@supabase/supabase-js"
+import { useEffect } from "react"
 import Calendar from "react-calendar"
 import "react-calendar/dist/Calendar.css"
 import moment from "moment-timezone"
@@ -10,14 +9,13 @@ import { FiAlertCircle, FiX } from "react-icons/fi"
 
 import { useAppointmentStore } from "./useAppointmentStore"
 import BookedAppointments from "./BookedAppointments"
-import { rescheduleAppointmentFn } from "./functions/rescheduleAppointmentFn"
-import { bookACallFn } from "./functions/bookACallFn"
+import { cancelAppointmentFn } from "./functions/cancelAppointmentFn"
+import { bookAppointmentFn } from "./functions/bookAppointmentFn"
 import { useDebounce } from "./hooks/useDebounce"
 import { validateEmail } from "./utils/validateEmailFn"
 import { selectDBAppointmentsAction } from "./actions/selectAppointmentsAction"
 import { IDBAppointment } from "./types/IDBAppointment"
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+import { deleteDBAppointmentAction } from "./actions/deleteDBAppointmentAction"
 
 function getCookie(name: string) {
   const value = `; ${document.cookie}`
@@ -46,7 +44,7 @@ function generateAvailableTimes(businessHours: BusinessHours, bookedTimes: momen
     let slot = moment(`${day.format("YYYY-MM-DD")} ${opens}`)
     const closeSlot = moment(`${day.format("YYYY-MM-DD")} ${closes}`)
     while (slot.isBefore(closeSlot)) {
-      !bookedTimes.some(b => b.isSame(slot)) && times.push(slot.clone())
+      !bookedTimes?.some(b => b.isSame(slot)) && times.push(slot.clone())
       slot.add(30, "minutes")
     }
   }
@@ -54,13 +52,15 @@ function generateAvailableTimes(businessHours: BusinessHours, bookedTimes: momen
 }
 
 type BusinessHours = {
-  [key: string]: { opens: string; closes: string }
+  [key: string]: { opens: string; closes: string } | null
 }
 
 type CalendarContainerProps = {
   businessHours: BusinessHours
   maxBookingDaysInAdvance: number
   defaultTimezone: string
+  businessOwnerPhone?: string // to receive notifictions about bookings
+  businessOwnerEmail?: string // to receive notifictions about bookings
   appointmentNotePlaceholder?: string
   phonePlaceholder?: string
 }
@@ -68,23 +68,27 @@ type CalendarContainerProps = {
 export default function CalendarContainer({
   businessHours,
   maxBookingDaysInAdvance,
+  businessOwnerPhone,
+  businessOwnerEmail,
   defaultTimezone,
-  appointmentNotePlaceholder = "Appointment note",
+  appointmentNotePlaceholder = "Appointment note (optional)",
   phonePlaceholder = "Phone",
 }: CalendarContainerProps) {
   const { firstName, setFirstName, firstNameError, setFirstNameError } = useAppointmentStore()
   const { phone, setPhone, phoneError, setPhoneError } = useAppointmentStore()
+  const { email, setEmail, emailError, setEmailError } = useAppointmentStore()
+  const { vehicle, setVehicle, vehicleError, setVehicleError } = useAppointmentStore()
   const { appointmentNote, setAppointmentNote, appointmentNoteError, setAppointmentNoteError } = useAppointmentStore()
   const { editingId, appointments, error, setEditingId, setAppointments, setError, setUserId, resetInputs } =
     useAppointmentStore()
-  const { selectedDate, setSelectedDate, selectedTime, setSelectedTime, email, setEmail, emailError, setEmailError } =
-    useAppointmentStore()
+  const { selectedDate, setSelectedDate, selectedTime, setSelectedTime } = useAppointmentStore()
+  const { selectedTimezone } = useAppointmentStore()
 
   moment.tz.setDefault(defaultTimezone ?? "Europe/London")
 
   const availableTimes = generateAvailableTimes(
     businessHours,
-    appointments.map(appt => moment.tz(`${appt.date} ${appt.time}`, "YYYY-MM-DD HH:mm", appt.timezone)),
+    appointments?.map(appt => moment.tz(`${appt.date} ${appt.time}`, "YYYY-MM-DD HH:mm", appt.timezone)),
     maxBookingDaysInAdvance,
   )
 
@@ -99,9 +103,9 @@ export default function CalendarContainer({
     setUserId(cookieUserId)
     // 2. Fetch user-specific appointments
     async function fetchAppts() {
-      console.log(102, "cookieUserId - ", cookieUserId)
       const selectResponse = await selectDBAppointmentsAction(cookieUserId)
-      selectResponse.error ? console.error(selectResponse.error) : setAppointments(selectResponse.data || [])
+      if (typeof selectResponse === "string") return console.error(selectResponse)
+      else setAppointments(selectResponse)
     }
     fetchAppts()
   }, [setAppointments, setUserId])
@@ -110,9 +114,12 @@ export default function CalendarContainer({
   const validateFirstName = (name: string) =>
     /^[a-zA-Z]{0,16}$/.test(name) ? "" : "Name must be 16 chars max, letters only"
 
-  // 2. Validate phone (max 17 chars, + and 0-9)
+  // 2. Validate phone (min 10 digits)
   const validatePhone = (phone: string) =>
-    /^\+?[0-9 ]{0,16}$/.test(phone) ? "" : "Phone must be 17 chars max, numbers, spaces and + only"
+    phone.replace(/\D/g, "").length < 10 ? "Please enter a valid phone number" : ""
+
+  const validateVehicle = (name: string) =>
+    /^[a-zA-Z0-9-]{0,32}$/.test(name) ? "" : "Vehicle must be 32 chars max, letters, digits, and '-' only"
 
   // 3. Handle input changes with validation
   const handleFirstNameChange = (value: string) => {
@@ -121,8 +128,14 @@ export default function CalendarContainer({
   }
 
   const handlePhoneChange = (value: string) => {
-    setPhone(value)
-    setPhoneError(validatePhone(value))
+    const formatted = formatPhoneNumber(value)
+    setPhone(formatted)
+    setPhoneError(validatePhone(formatted))
+  }
+
+  const handleVehicleChange = (value: string) => {
+    setVehicle(value)
+    setVehicleError(validateVehicle(value))
   }
 
   const handleAppointmentNoteChange = (value: string) => {
@@ -134,15 +147,35 @@ export default function CalendarContainer({
   const handleBook = async () => {
     // 1. Validate inputs
     if (!firstName || !phone) return setError("First name and phone required")
-    if (firstNameError || phoneError || appointmentNoteError) return setError("Please fix input errors")
+    if (firstNameError || phoneError || appointmentNoteError || vehicleError) return setError("Please fix input errors")
     // 2. Validate date is not in the past
     const selected = moment(selectedDate).startOf("day")
     const today = moment().startOf("day")
     if (selected.isBefore(today)) return setError("Cannot book past dates")
     // 3. Book or reschedule
 
+    const appointmentId = editingId || crypto.randomUUID()
+
     if (editingId) {
-      const response = await rescheduleAppointmentFn(editingId)
+      const originalAppt = appointments.find(appt => appt.id === editingId)
+      if (!originalAppt) return setError("Appointment not found")
+      const hasChanges =
+        selectedDate !== originalAppt.date ||
+        selectedTime !== originalAppt.time ||
+        firstName !== originalAppt.first_name ||
+        phone !== originalAppt.phone ||
+        (email || "") !== (originalAppt.email || "") ||
+        (appointmentNote || "") !== (originalAppt.note || "") ||
+        selectedTimezone !== originalAppt.timezone
+
+      if (!hasChanges) {
+        setEditingId(null)
+        return
+      }
+      const cancelAppt = await cancelAppointmentFn(appointmentId, defaultTimezone, businessOwnerPhone)
+      if (!cancelAppt?.ok) return
+
+      const response = await bookAppointmentFn(appointmentId, defaultTimezone, businessOwnerPhone)
       if (typeof response === "object") {
         setAppointments(
           appointments.map(appt =>
@@ -153,7 +186,7 @@ export default function CalendarContainer({
         resetInputs()
       }
     } else {
-      const response = await bookACallFn()
+      const response = await bookAppointmentFn(appointmentId, defaultTimezone, businessOwnerPhone)
       if (typeof response === "object") {
         setAppointments([...appointments, response])
         resetInputs()
@@ -162,8 +195,10 @@ export default function CalendarContainer({
   }
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("appointments").delete().eq("id", id)
-    error ? setError("Error deleting") : setAppointments(appointments.filter(a => a.id !== id))
+    const deleteResponse = await deleteDBAppointmentAction(id)
+    typeof deleteResponse === "string"
+      ? setError(deleteResponse)
+      : setAppointments(appointments.filter(a => a.id !== id))
   }
 
   const handleEdit = (appt: IDBAppointment) => {
@@ -211,103 +246,142 @@ export default function CalendarContainer({
   const maxDate = new Date(today.getFullYear(), today.getMonth(), today.getDate())
   maxDate.setDate(maxDate.getDate() + maxBookingDaysInAdvance)
 
+  // 5. Handle phone input key events
+  const handlePhoneKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter, home, end, left, right
+    if ([8, 9, 27, 13, 46, 35, 36, 37, 39].includes(e.keyCode)) return
+    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+    if ((e.keyCode === 65 || e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 88) && e.ctrlKey) return
+    // Ensure that it is a number and stop the keypress
+    if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
+      e.preventDefault()
+    }
+  }
+  // 1. Format phone number with mask +XX XXX XXX XX XX
+  const formatPhoneNumber = (value: string): string => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, "")
+
+    // If empty, return +44 prefix
+    if (digits.length === 0) return "+44 "
+
+    // Start with +44 if user hasn't provided country code
+    let formattedDigits = digits.startsWith("44") ? digits : "44" + digits
+
+    // Format as +XX XXX XXX XX XX
+    if (formattedDigits.length <= 2) return `+${formattedDigits}`
+    if (formattedDigits.length <= 5) return `+${formattedDigits.slice(0, 2)} ${formattedDigits.slice(2)}`
+    if (formattedDigits.length <= 8)
+      return `+${formattedDigits.slice(0, 2)} ${formattedDigits.slice(2, 5)} ${formattedDigits.slice(5)}`
+    if (formattedDigits.length <= 10)
+      return `+${formattedDigits.slice(0, 2)} ${formattedDigits.slice(2, 5)} ${formattedDigits.slice(5, 8)} ${formattedDigits.slice(8)}`
+
+    return `+${formattedDigits.slice(0, 2)} ${formattedDigits.slice(2, 5)} ${formattedDigits.slice(5, 8)} ${formattedDigits.slice(8, 10)} ${formattedDigits.slice(10, 12)}`
+  }
+
   return (
-    <div className="w-full max-w-4xl mx-auto bg-black/20 backdrop-blur-md rounded-2xl border border-white/20 hover:border-brand/30 p-6 shadow-2xl shadow-black/50 transition-all duration-300">
+    <div className="w-full max-w-4xl mx-auto bg-foreground p-6 rounded-lg">
       {error && (
         <motion.div
-          className="bg-brand/10 border border-brand/30 rounded-xl p-3 flex items-center gap-3 mb-4 backdrop-blur-sm"
+          className="bg-danger/10 border border-danger/30 rounded p-3 flex items-center gap-3 mb-4"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.18 }}>
-          <FiAlertCircle className="text-brand flex-shrink-0" />
-          <p className="text-brand flex-1">{error}</p>
-          <button className="p-1 hover:bg-brand/20 rounded transition-colors" onClick={() => setError("")}>
-            <FiX className="text-brand" />
+          <FiAlertCircle className="text-danger flex-shrink-0" />
+          <p className="text-danger flex-1">{error}</p>
+          <button className="p-1 hover:bg-danger/20 rounded" onClick={() => setError("")}>
+            <FiX className="text-danger" />
           </button>
         </motion.div>
       )}
 
       <style>{`
-        .react-calendar {
-          background: rgba(0, 0, 0, 0.3) !important;
-          backdrop-filter: blur(8px) !important;
-          color: white !important;
-          border: 1px solid rgba(255, 255, 255, 0.1) !important;
-          border-radius: 12px !important;
-          padding: 16px !important;
-          width: 100% !important;
-        }
-        .react-calendar__navigation {
-          margin-bottom: 16px;
-          background: rgba(0, 0, 0, 0.4) !important;
-          backdrop-filter: blur(4px) !important;
-          border: 1px solid rgba(255, 255, 255, 0.1) !important;
-          border-radius: 8px;
-          padding: 8px;
-        }
-        .react-calendar__navigation button {
-          min-width: 32px;
-          height: 32px;
-          border: none;
-          background: transparent !important;
-          color: #ef4444 !important;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .react-calendar__navigation button:hover {
-          background: rgba(239, 68, 68, 0.2) !important;
-        }
-        .react-calendar__navigation__label {
-          font-weight: 600;
-          color: white;
-          pointer-events: none !important;
-        }
-        .react-calendar__month-view__weekdays {
-          font-size: 12px;
-          color: rgba(255, 255, 255, 0.7);
-          margin-bottom: 8px;
-        }
-        .react-calendar__month-view__days {
-          display: grid !important;
-          grid-template-columns: repeat(7, 1fr) !important;
-          gap: 2px !important;
-        }
-        .react-calendar__tile {
-          background: rgba(0, 0, 0, 0.3) !important;
-          backdrop-filter: blur(4px) !important;
-          color: white;
-          border: 1px solid rgba(255, 255, 255, 0.1) !important;
-          border-radius: 6px !important;
-          aspect-ratio: 1;
-          font-size: 14px;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          transition: all 0.2s;
-        }
-        .react-calendar__tile:hover {
-          background: rgba(239, 68, 68, 0.2) !important;
-          border-color: rgba(239, 68, 68, 0.3) !important;
-        }
-        .react-calendar__tile--active {
-          background: #ef4444 !important;
-          color: white !important;
-          border-color: #ef4444 !important;
-          box-shadow: 0 0 20px rgba(239, 68, 68, 0.3) !important;
-        }
-        .react-calendar__tile--active:hover {
-          background: #ef4444 !important;
-          color: white !important;
-        }
-        .react-calendar__tile:disabled {
-          background: rgba(0, 0, 0, 0.2) !important;
-          color: rgba(255, 255, 255, 0.3) !important;
-          pointer-events: none;
-          border-color: rgba(255, 255, 255, 0.05) !important;
-        }
-      `}</style>
+      .react-calendar {
+        background: hsl(var(--background)) !important;
+        color: hsl(var(--title)) !important;
+        border: 1px solid hsl(var(--border-color) / 0.3) !important;
+        border-radius: 8px !important;
+        padding: 16px !important;
+        width: 100% !important;
+      }
+      .react-calendar__navigation {
+        margin-bottom: 16px;
+        background: hsl(var(--foreground-accent)) !important;
+        border-radius: 6px;
+        padding: 8px;
+      }
+      .react-calendar__navigation button {
+        min-width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent !important;
+        color: hsl(var(--brand)) !important;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .react-calendar__navigation button:hover {
+        background: hsl(var(--brand) / 0.1) !important;
+      }
+      .react-calendar__navigation__label {
+        font-weight: 600;
+        color: hsl(var(--title));
+        pointer-events: none !important;
+      }
+      .react-calendar__month-view__weekdays {
+        font-size: 12px;
+        color: hsl(var(--subTitle));
+        margin-bottom: 8px;
+      }
+      .react-calendar__month-view__days {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 2px !important;
+      }
+      .react-calendar__tile {
+        background: hsl(var(--background)) !important;
+        color: hsl(var(--title));
+        border: 1px solid hsl(var(--border-color) / 0.2) !important;
+        border-radius: 4px !important;
+        aspect-ratio: 1;
+        font-size: 14px;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      .react-calendar__tile:hover {
+        background: hsl(var(--brand) / 0.1) !important;
+      }
+      .react-calendar__tile--active {
+        background: hsl(var(--brand)) !important;
+        color: hsl(var(--title-foreground)) !important;
+      }
+      .react-calendar__tile--active:hover {
+        background: hsl(var(--brand)) !important;
+        color: hsl(var(--title-foreground)) !important;
+      }
+      .react-calendar__tile:disabled {
+        background: hsl(var(--foreground) / 0.5) !important;
+        color: hsl(var(--subTitle) / 0.4) !important;
+        pointer-events: none;
+      }
+      
+      /* Custom scrollbar styling */
+      .times-scroll::-webkit-scrollbar {
+        width: 8px;
+      }
+      .times-scroll::-webkit-scrollbar-track {
+        background: hsl(var(--background));
+        border-radius: 4px;
+      }
+      .times-scroll::-webkit-scrollbar-thumb {
+        background: hsl(var(--brand));
+        border-radius: 4px;
+      }
+      .times-scroll::-webkit-scrollbar-thumb:hover {
+        background: hsl(var(--brand) / 0.8);
+      }
+    `}</style>
 
       <div className="grid laptop:grid-cols-2 gap-6 mb-6">
         <Calendar
@@ -333,20 +407,20 @@ export default function CalendarContainer({
           formatMonthYear={(locale, date) => moment(date).format("MMM YYYY")}
         />
 
-        <div className="flex flex-col">
-          <p className="text-white/70 mb-3 drop-shadow-sm">{selectedDate ? "Available times" : "Select a date"}</p>
-          <div className="flex-1 min-h-[320px]">
+        <div className="flex flex-col h-[398px]">
+          <p className="text-subTitle mb-3">{selectedDate ? "Available times" : "Select a date"}</p>
+          <div className="flex-1 overflow-hidden">
             {selectedDate ? (
               filteredTimes.length ? (
-                <div className="grid grid-cols-3 gap-2 h-full overflow-y-auto pr-2 content-start scrollbar-thin scrollbar-thumb-red-500/30 scrollbar-track-transparent">
+                <div className="grid grid-cols-3 gap-2 h-full overflow-y-auto pr-2 content-start times-scroll">
                   {filteredTimes.map(time => (
                     <button
                       key={time.format()}
                       onClick={() => setSelectedTime(time.format("HH:mm"))}
-                      className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 h-fit backdrop-blur-sm ${
+                      className={`px-3 py-2 text-sm rounded transition-colors h-fit ${
                         selectedTime === time.format("HH:mm")
-                          ? "bg-brand text-white border border-brand shadow-lg shadow-brand/30"
-                          : "bg-black/30 text-white border border-white/10 hover:bg-brand/20 hover:border-brand/30"
+                          ? "bg-brand text-title-foreground"
+                          : "bg-background text-title border border-border-color hover:bg-brand/10"
                       }`}>
                       {time.format("h:mm A")}
                     </button>
@@ -354,12 +428,12 @@ export default function CalendarContainer({
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-white/70">No available times</p>
+                  <p className="text-subTitle">No available times</p>
                 </div>
               )
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className="text-white/70">Select a date to view available times</p>
+                <p className="text-subTitle">Select a date to view available times</p>
               </div>
             )}
           </div>
@@ -367,51 +441,136 @@ export default function CalendarContainer({
       </div>
 
       <div className="grid tablet:grid-cols-2 gap-3 mb-4">
-        <div>
-          <input
-            className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-brand/30 focus:border-brand/50 rounded-lg px-3 py-2 text-white w-full transition-all duration-200 placeholder:text-white/50"
-            type="text"
-            value={firstName}
-            onChange={e => handleFirstNameChange(e.target.value)}
-            placeholder="First name"
-          />
-          {firstNameError && <p className="text-brand text-sm mt-1">{firstNameError}</p>}
-        </div>
-        <div>
-          <input
-            className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-brand/30 focus:border-brand/50 rounded-lg px-3 py-2 text-white w-full transition-all duration-200 placeholder:text-white/50"
-            type="tel"
-            value={phone}
-            onChange={e => handlePhoneChange(e.target.value)}
-            placeholder={phonePlaceholder}
-          />
-          {phoneError && <p className="text-brand text-sm mt-1">{phoneError}</p>}
-        </div>
+        <input
+          className={`bg-background border rounded px-3 py-2 text-title w-full transition-colors ${
+            firstNameError
+              ? "border-danger ring-2 ring-danger/20 focus:ring-danger/30"
+              : "border-border-color focus:ring-2 focus:ring-brand/20"
+          }`}
+          type="text"
+          value={firstName}
+          tabIndex={1}
+          onChange={e => handleFirstNameChange(e.target.value)}
+          placeholder="First name"
+        />
+
+        <input
+          className={`bg-background border rounded px-3 py-2 text-title w-full transition-colors ${
+            vehicleError
+              ? "border-danger ring-2 ring-danger/20 focus:ring-danger/30"
+              : "border-border-color focus:ring-2 focus:ring-brand/20"
+          }`}
+          value={vehicle}
+          tabIndex={2}
+          onChange={e => handleVehicleChange(e.target.value)}
+          placeholder="Vehicle"
+        />
       </div>
 
-      <div className="mb-3">
+      <div className="grid tablet:grid-cols-2 gap-3 mb-4">
         <input
-          className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-brand/30 focus:border-brand/50 rounded-lg px-3 py-2 w-full text-white transition-all duration-200 placeholder:text-white/50"
+          className={`bg-background border rounded px-3 py-2 text-title w-full transition-colors ${
+            phoneError
+              ? "border-danger ring-2 ring-danger/20 focus:ring-danger/30"
+              : "border-border-color focus:ring-2 focus:ring-brand/20"
+          }`}
+          type="tel"
+          value={phone}
+          tabIndex={3}
+          onKeyDown={handlePhoneKeyDown}
+          onChange={e => handlePhoneChange(e.target.value)}
+          placeholder={phonePlaceholder}
+        />
+
+        <input
+          className={`bg-background border rounded px-3 py-2 w-full text-title transition-colors ${
+            emailError
+              ? "border-danger ring-2 ring-danger/20 focus:ring-danger/30"
+              : "border-border-color focus:ring-2 focus:ring-brand/20"
+          }`}
           type="email"
           value={email}
+          tabIndex={4}
           onChange={e => setEmail(e.target.value)}
           placeholder="Email (optional)"
         />
-        {emailError && <p className="text-brand text-sm mt-1">{emailError}</p>}
       </div>
 
-      <div className="mb-3">
+      <div className="mb-4">
         <textarea
-          className="bg-black/30 backdrop-blur-sm border border-white/10 hover:border-brand/30 focus:border-brand/50 rounded-lg px-3 py-2 w-full h-20 resize-none text-white transition-all duration-200 placeholder:text-white/50"
+          className={`bg-background border rounded px-3 py-2 w-full h-20 resize-none text-title transition-colors ${
+            appointmentNoteError
+              ? "border-danger ring-2 ring-danger/20 focus:ring-danger/30"
+              : "border-border-color focus:ring-2 focus:ring-brand/20"
+          }`}
           value={appointmentNote}
+          tabIndex={5}
           onChange={e => handleAppointmentNoteChange(e.target.value)}
           placeholder={appointmentNotePlaceholder}
         />
-        {appointmentNoteError && <p className="text-brand text-sm mt-1">{appointmentNoteError}</p>}
       </div>
 
+      {/* 1. Consolidated error display section */}
+      {(firstNameError || vehicleError || phoneError || emailError || appointmentNoteError) && (
+        <motion.div
+          className="bg-danger/5 border border-danger/20 rounded-lg p-4 mb-4 space-y-2"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2 }}>
+          <div className="flex items-center gap-2 mb-3">
+            <FiAlertCircle className="text-danger flex-shrink-0" />
+            <h4 className="text-danger font-medium">Please fix the following errors:</h4>
+          </div>
+          <div className="space-y-1.5">
+            {firstNameError && (
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 bg-danger rounded-full mt-2 flex-shrink-0" />
+                <p className="text-danger text-sm">
+                  <span className="font-medium">First name:</span> {firstNameError}
+                </p>
+              </div>
+            )}
+            {vehicleError && (
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 bg-danger rounded-full mt-2 flex-shrink-0" />
+                <p className="text-danger text-sm">
+                  <span className="font-medium">Vehicle:</span> {vehicleError}
+                </p>
+              </div>
+            )}
+            {phoneError && (
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 bg-danger rounded-full mt-2 flex-shrink-0" />
+                <p className="text-danger text-sm">
+                  <span className="font-medium">Phone:</span> {phoneError}
+                </p>
+              </div>
+            )}
+            {emailError && (
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 bg-danger rounded-full mt-2 flex-shrink-0" />
+                <p className="text-danger text-sm">
+                  <span className="font-medium">Email:</span> {emailError}
+                </p>
+              </div>
+            )}
+            {appointmentNoteError && (
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 bg-danger rounded-full mt-2 flex-shrink-0" />
+                <p className="text-danger text-sm">
+                  <span className="font-medium">Notes:</span> {appointmentNoteError}
+                </p>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
+
       <button
+        className="bg-brand hover:bg-brand/90 disabled:bg-brand/50 text-title-foreground px-6 py-3 rounded w-full font-medium mb-4 transition-colors"
         onClick={handleBook}
+        tabIndex={5}
         disabled={
           !selectedDate ||
           !selectedTime ||
@@ -419,9 +578,9 @@ export default function CalendarContainer({
           !phone ||
           !!firstNameError ||
           !!phoneError ||
-          !!appointmentNoteError
-        }
-        className="bg-brand hover:bg-brand disabled:bg-brand/30 text-white px-6 py-3 rounded-lg w-full font-medium mb-4 transition-all duration-200 backdrop-blur-sm shadow-lg disabled:shadow-none hover:shadow-brand/20">
+          !!appointmentNoteError ||
+          !!vehicleError
+        }>
         {editingId ? "Update" : "Book"}
       </button>
 

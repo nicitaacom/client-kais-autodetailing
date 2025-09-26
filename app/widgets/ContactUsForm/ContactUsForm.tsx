@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
+import Link from "next/link"
 import { twMerge } from "tailwind-merge"
 import { Input } from "@/components/Input"
 import { businessInfo } from "@/consts/businessInfo"
@@ -101,7 +102,7 @@ export function ContactUsForm() {
     !validateMessage(formData.message)
 
   return (
-    <div className="w-full max-w-[500px]">
+    <div className="w-full max-w-[500px] h-fit">
       {(errorMessage || successMessage) && (
         <div
           className={twMerge(
@@ -112,79 +113,89 @@ export function ContactUsForm() {
         </div>
       )}
 
-      <form
-        onSubmit={handleSubmit}
-        className="w-full bg-foreground rounded-xl border border-border-color p-6 space-y-6">
+      <div className="w-full bg-foreground rounded-xl border border-border-color p-6 space-y-6 h-full flex flex-col">
         <div className="flex items-center gap-3">
           <div className="w-1 h-8 bg-brand rounded-full" />
           <h1 className="text-title text-2xl font-bold">Contact us</h1>
         </div>
 
-        <div className="grid grid-cols-1 mobile:grid-cols-[1fr,1.5fr] gap-4">
-          <div className="space-y-1">
-            <Input
-              className="w-full focus:ring-2 focus:ring-brand/30 focus:border-brand rounded-lg"
-              type="text"
-              id="firstName"
-              name="firstName"
-              label="My name is"
-              value={formData.firstName}
-              onChange={handleChange}
-              placeholder="James"
-              maxLength={32}
-            />
-            {errors.firstName && <p className="text-danger text-xs">{errors.firstName}</p>}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-6">
+          <div className="grid grid-cols-1 mobile:grid-cols-[1fr,1.5fr] gap-4">
+            <div className="space-y-1">
+              <Input
+                className="w-full focus:ring-2 focus:ring-brand/30 focus:border-brand rounded-lg"
+                type="text"
+                id="firstName"
+                name="firstName"
+                label="My name is"
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder="James"
+                maxLength={32}
+              />
+              {errors.firstName && <p className="text-danger text-xs">{errors.firstName}</p>}
+            </div>
+
+            <div className="space-y-1">
+              <Input
+                className="w-full focus:ring-2 focus:ring-brand/30 focus:border-brand rounded-lg font-mono"
+                type="text"
+                id="phone"
+                name="phone"
+                label="How do we contact you?"
+                value={formData.phone}
+                onChange={handleChange}
+                onKeyDown={handlePhoneKeyDown}
+                placeholder="+44 123 456 78 90"
+                maxLength={17}
+              />
+              {errors.phone && <p className="text-danger text-xs">{errors.phone}</p>}
+            </div>
           </div>
 
-          <div className="space-y-1">
-            <Input
-              className="w-full focus:ring-2 focus:ring-brand/30 focus:border-brand rounded-lg font-mono"
-              type="text"
-              id="phone"
-              name="phone"
-              label="How do we contact you?"
-              value={formData.phone}
-              onChange={handleChange}
-              onKeyDown={handlePhoneKeyDown}
-              placeholder="+44 123 456 78 90"
-              maxLength={17}
-            />
-            {errors.phone && <p className="text-danger text-xs">{errors.phone}</p>}
+          <div className="space-y-1 flex-1 flex flex-col">
+            <label className="block text-sm font-medium text-subTitle" htmlFor="message">
+              I want
+            </label>
+            <div className="relative flex-1 flex flex-col">
+              <textarea
+                className="w-full flex-1 bg-foreground-accent text-title border border-border-color rounded-lg
+                focus:ring-2 focus:ring-brand/30 focus:border-brand focus:outline-none px-3 py-3 text-sm transition-all resize-none pr-16"
+                id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                placeholder={businessInfo.cta}
+                maxLength={300}
+              />
+              <p className="absolute bottom-3 right-3 text-subTitle/60 text-xs pointer-events-none font-mono">
+                {formData.message.length}/300
+              </p>
+            </div>
+            {errors.message && <p className="text-danger text-xs">{errors.message}</p>}
           </div>
-        </div>
 
-        <div className="space-y-1">
-          <label className="block text-sm font-medium text-subTitle" htmlFor="message">
-            I want
-          </label>
-          <div className="relative">
-            <textarea
-              className="w-full bg-foreground-accent text-title border border-border-color rounded-lg
-              focus:ring-2 focus:ring-brand/30 focus:border-brand focus:outline-none px-3 py-3 text-sm transition-all min-h-[100px] resize-none pr-16"
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              placeholder={businessInfo.cta}
-              maxLength={300}
-            />
-            <p className="absolute bottom-3 right-3 text-subTitle/60 text-xs pointer-events-none font-mono">
-              {formData.message.length}/300
-            </p>
+          <div className="space-y-3 mt-auto">
+            <button
+              className={twMerge(
+                "w-full bg-brand hover:bg-brand/90 text-title-foreground px-4 py-3 font-semibold rounded-lg transition-all duration-200 shadow-lg",
+                isFormValid
+                  ? "hover:shadow-brand/25 active:scale-[0.98] hover:shadow-xl"
+                  : "opacity-50 cursor-not-allowed",
+              )}
+              type="submit"
+              disabled={!isFormValid}>
+              {businessInfo.cta}
+            </button>
+
+            <Link
+              href="/booking"
+              className="block w-full text-center bg-foreground-accent hover:bg-border-color text-title px-4 py-3 font-semibold rounded-lg transition-all duration-200 border border-border-color hover:border-brand/30">
+              Book Online
+            </Link>
           </div>
-          {errors.message && <p className="text-danger text-xs">{errors.message}</p>}
-        </div>
-
-        <button
-          className={twMerge(
-            "w-full bg-brand hover:bg-brand/90 text-title-foreground px-4 py-3 font-semibold rounded-lg transition-all duration-200 shadow-lg",
-            isFormValid ? "hover:shadow-brand/25 active:scale-[0.98] hover:shadow-xl" : "opacity-50 cursor-not-allowed",
-          )}
-          type="submit"
-          disabled={!isFormValid}>
-          {businessInfo.cta}
-        </button>
-      </form>
+        </form>
+      </div>
     </div>
   )
 }

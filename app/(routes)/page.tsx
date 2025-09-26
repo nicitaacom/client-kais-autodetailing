@@ -7,6 +7,7 @@ import { HowDoWeWork } from "./components/HowDoWeWork"
 import { HowWeCanHelpYou } from "./components/HowWeCanHelpYou"
 import { NotificationBar } from "./components/NotificationBar"
 import { Reviews } from "./components/Reviews"
+import { WorkExamples } from "./components/WorkExamples"
 
 export default function Page() {
   return (
@@ -15,12 +16,13 @@ export default function Page() {
         <NotificationBar />
         <Header />
         <div className="flex flex-col gap-y-12 px-2 mobile:px-4 tablet:px-8 laptop:px-16 py-12 mobile:py-16 laptop:py-24">
-          <section className="flex flex-col desktop:flex-row justify-between gap-6">
+          <section className="flex flex-col desktop:flex-row desktop:items-start justify-between gap-6">
             <HowWeCanHelpYou />
             <ContactUsForm />
           </section>
           <AICarService />
           <Reviews />
+          <WorkExamples />
           <HowDoWeWork />
         </div>
         <Footer />

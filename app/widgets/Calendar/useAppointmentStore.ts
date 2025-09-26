@@ -7,8 +7,6 @@ interface AppointmentState {
   selectedTimezone: string // e.g Europe/London
   channel: string // e.g telegram/email/google-meet
 
-  email?: string
-  emailError: string
   sendNotificationTo: string
   inputNotificationTo: string
   step: number
@@ -37,8 +35,16 @@ interface AppointmentState {
   setSelectedTimezone: (tz: string) => void
   setChannel: (ch: string) => void
 
+  email?: string
+  emailError: string
   setEmail: (email: string) => void
   setEmailError: (emailError: string) => void
+
+  vehicle?: string
+  vehicleError: string
+  setVehicle: (vehicle: string) => void
+  setVehicleError: (vehicleError: string) => void
+
   setSendNotificationTo: (to: string) => void
   setInputNotificationTo: (input: string) => void
   setNextStep: () => void
@@ -57,8 +63,6 @@ export const useAppointmentStore = create<AppointmentState>(set => ({
 
   channel: "google-meets",
 
-  email: "",
-  emailError: "",
   sendNotificationTo: "telegram",
   inputNotificationTo: "",
   step: 4,
@@ -87,8 +91,16 @@ export const useAppointmentStore = create<AppointmentState>(set => ({
   setSelectedTimezone: selectedTimezone => set({ selectedTimezone }),
   setChannel: channel => set({ channel }),
 
+  email: "",
+  emailError: "",
   setEmail: email => set({ email }),
   setEmailError: emailError => set({ emailError }),
+
+  vehicle: "",
+  vehicleError: "",
+  setVehicle: vehicle => set({ vehicle }),
+  setVehicleError: vehicleError => set({ vehicleError }),
+
   setSendNotificationTo: sendNotificationTo => set({ sendNotificationTo }),
   setInputNotificationTo: inputNotificationTo => set({ inputNotificationTo }),
   setNextStep: () => set(s => ({ step: s.step + 1 })),

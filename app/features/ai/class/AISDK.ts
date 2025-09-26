@@ -55,6 +55,6 @@ export class AISDK {
   }
 
   static isImageGenerationResponse(result: ImageGenerationResponse | string): result is ImageGenerationResponse {
-    return typeof result === "object" && "beforeImage" in result && "afterImage" in result
+    return typeof result === "object" && "beforeImageUrl" in result && "afterImageUrl" in result
   }
 }

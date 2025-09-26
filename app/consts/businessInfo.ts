@@ -7,9 +7,8 @@ export const businessInfo = {
   timezone: "Europe/London",
   email: "14enhancements@gmail.com",
   websiteUrl: "https://kais-autodetailing.com",
-  yellPagesUrl: "",
-  logoUrl: "https://i.imgur.com/1HY8d2x.jpeg",
-  cta: "get free quote",
+  logoUrl: "/logo.jpeg",
+  cta: "Get free quote",
 
   // 2. Location / map
   address: {
@@ -20,9 +19,9 @@ export const businessInfo = {
     country: "United Kingdom",
   },
   coordinates: { latitude: 52.5914, longitude: -2.11 },
-  mapUrl:
-    // TODO - update google maps url
-    "",
+  mapUrl: "",
+
+  areasServed: ["West Midlands"],
 
   // 3. Hours & service area
   businessHours: {
@@ -34,7 +33,15 @@ export const businessInfo = {
     saturday: { opens: "06:00", closes: "20:00" },
     sunday: { opens: "06:00", closes: "20:00" },
   },
-  areasServed: ["West Midlands"],
+
+  // 5. socials & business meta
+  yellPagesUrl: "",
+  facebookUrl: "https://www.facebook.com/share/1J3z4nNCTr/",
+  instagramUrl: "https://www.instagram.com/kais.enhancements?igsh=MWl1ZjVoaWY2MnNqdQ==",
+  foundingYear: 2024,
+  founders: ["Kairo"],
+  priceRange: "££",
+  guarantee: "Satisfaction Guarantee - If you’re not 100% satisfied, I’ll make it right before you leave.",
 
   // 4. High-level services (used for meta / schema)
   primaryServices: [
@@ -87,14 +94,6 @@ export const businessInfo = {
     },
   ],
 
-  // 5. socials & business meta
-  facebookUrl: "https://www.facebook.com/share/1J3z4nNCTr/",
-  instagramUrl: "https://www.instagram.com/kais.enhancements?igsh=MWl1ZjVoaWY2MnNqdQ==",
-  foundingYear: 2024,
-  founders: ["Kairo"],
-  priceRange: "££",
-  guarantee: "Satisfaction Guarantee - If you’re not 100% satisfied, I’ll make it right before you leave.",
-
   // 6. Rating info (numbers, ready for structured data)
   rating: {
     average: 5,
@@ -104,3 +103,72 @@ export const businessInfo = {
     max: 5,
   },
 }
+
+/*
+
+
+when client book an appointment with you where would you like to receive notification?
+Email or SMS?
+
+Answer: Email
+
+-------------------------------
+
+when client fills out "Contact us" form where would you like to receive notification?
+Email or SMS?
+
+Answer: Email
+
+
+-------------------------------
+
+ what style/design would you like to be on your website?
+ for example we I did 1 website for client in ghost style for other client in black and purple minimalistic design
+ so maybe you have some assotiation with your business? like maybe some your favorite animal or favorite number?
+ or maybe you saw website somewhere and you want something similar
+
+take some impression from here: (use search)
+https://dribbble.com/
+https://mobbin.com/discover/sites/latest
+https://iwash-uk.booking.getautomate.io/packages?category=635b521f7cadec879afcd6988154e99b
+
+
+Answer: same
+
+
+-------------------------------
+
+
+what colours would you like on your website? e.g red&black
+
+Answer: red&black
+
+
+
+-------------------------------
+
+
+what fetures would you like to see on your website? e.g repuration-management + appointment-booking + before-after images
+
+Answer: appointment-booking - repuration-management - before-after images
+
+
+
+
+-------------------------------
+
+are you providing 24/7 service?
+e.g emergency call
+
+Answer: 
+
+If yes - remove that "Need 24/7?" from footer
+
+
+-------------------------------
+
+
+should I add some additional section with examples of your work or should I keep it as is?
+
+Answer: 
+*/

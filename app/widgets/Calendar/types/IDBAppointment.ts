@@ -8,7 +8,5 @@ export interface IDBAppointment {
   first_name: string
   phone: string
   email?: string
-  channel: string
   note: string
-  notification_to: string
 }

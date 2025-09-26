@@ -3,50 +3,74 @@
 import { createClient } from "@supabase/supabase-js"
 import moment from "moment-timezone"
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
-export async function scheduleEmailNotification(
+function validateInputs(message: string, selectedDate: string | null, at: string): string | null {
+  if (!message) return "Message is required"
+  if (!selectedDate) return "You need to select a date"
+  if (!at) return "Time is required"
+  return null
+}
+
+export async function scheduleEmailNtfcnAction(
   message: string,
   selectedDate: string | null,
-  at: string,
-  channel: string,
-  sendNotificationTo: string,
-  inputNotificationTo: string,
-) {
-  if (!selectedDate) return "You need to select a date"
+  appointment_at: string,
+
+  appointmentId?: string,
+): Promise<void | string> {
+  // 1. Validate inputs
+  const validationError = validateInputs(message, selectedDate, appointment_at)
+  if (validationError) return validationError
 
   const date = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate
   if (!date) return "Missing date for scheduling"
 
+  // 2. Parse and validate scheduling time
   const bookingDate = moment(date).format("YYYY-MM-DD")
-  const baseTime = moment.tz(`${bookingDate} ${at}`, "Europe/Moscow").seconds(0).milliseconds(0)
+  const baseTime = moment.tz(`${bookingDate} ${appointment_at}`, "Europe/Moscow").seconds(0).milliseconds(0)
 
   if (baseTime.isBefore(moment())) return "Scheduling time is in the past"
 
-  const scheduleTimes = [
-    {
-      scheduledFor: baseTime.clone().subtract(30, "minutes").toISOString(),
-      subject: "Meeting Reminder - 30 minutes",
-      html: `<p>Reminder about meeting in 30 minutes:</p><p>${message}</p>`,
-    },
-    {
-      scheduledFor: baseTime.toISOString(),
-      subject: "Meeting Time",
-      html: `<p>${message}</p>`,
-    },
-  ]
+  // 3. Insert email notification
+  const scheduledFor = baseTime.clone().subtract(30, "minutes")
+  const notificationId = crypto.randomUUID()
+  const { error: insertError } = await supabase.from("email_notifications").insert({
+    id: notificationId,
+    appointment_id: appointmentId,
+    email: `notifications@${process.env.NEXT_PUBLIC_EMAIL_FROM_DOMAIN}`,
+    message,
+    scheduled_for: scheduledFor.toISOString(),
+  })
 
-  for (const { scheduledFor, subject, html } of scheduleTimes) {
-    const { error } = await supabase.from("email_notifications").insert({
-      email: sendNotificationTo || inputNotificationTo,
-      subject,
-      html,
-      scheduled_for: scheduledFor,
-    })
+  if (insertError) {
+    console.error("Error inserting notification:", insertError)
+    return `Error scheduling: ${insertError.message}`
+  }
 
-    if (error) {
-      console.error("Error scheduling email:", error)
-      return `Error scheduling: ${error.message}`
-    }
+  // 4. Create pg_cron schedule
+  const cronJobName = `email_notification_${notificationId}`
+  const cronSchedule = `${scheduledFor.minute()} ${scheduledFor.hour()} ${scheduledFor.date()} ${
+    scheduledFor.month() + 1
+  } ${scheduledFor.day()}`
+
+  const edgeFunctionUrl = "https://mdltdmheelhfcvbglhxr.supabase.co/functions/v1/email-reminder"
+
+  const query = `
+    SELECT cron.schedule(
+      '${cronJobName}',
+      '${cronSchedule}',
+      $$SELECT net.http_post(
+        url := '${edgeFunctionUrl}',
+        headers := '{"Authorization": "Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}", "Content-Type": "application/json"}',
+        body := '{"notificationId": "${notificationId}"}'
+      )$$
+    );
+  `
+
+  const { error: cronError } = await supabase.rpc("execute_any_sql", { query })
+  if (cronError) {
+    console.error("Error scheduling cron job:", cronError)
+    return `Error scheduling cron: ${cronError.message}`
   }
 }
