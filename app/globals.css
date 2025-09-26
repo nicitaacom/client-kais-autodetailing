@@ -67,7 +67,7 @@ body {
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #821c1c #000000;
+  scrollbar-color: hsl(var(--brand)) #000000;
 }
 
 /* Chrome, Edge, and Safari */
