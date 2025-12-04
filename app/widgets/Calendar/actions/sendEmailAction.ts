@@ -59,7 +59,7 @@ export async function sendEmailAction(
                     ? `
                 <div style="background-color: #111111; border-radius: 6px; padding: 16px; border-left: 3px solid #7c3aed;">
                   <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #a855f7; text-transform: uppercase; letter-spacing: 0.5px;">Message</h3>
-                  <p style="margin: 0; color: #ffffff; font-size: 14px; line-height: 1.4;">${body}</p>
+                  <p style="margin: 0; color: #ffffff; font-size: 14px; line-height: 1.6; white-space: pre-line;">${body}</p>
                 </div>
                 `
                     : ""
